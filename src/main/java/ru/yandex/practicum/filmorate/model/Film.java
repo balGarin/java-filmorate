@@ -19,5 +19,5 @@ public class Film {
     @ConsistentDateParameters
     private LocalDate releaseDate;
     @Positive(message = "Длительность должна быть положительным числом")
-    private Integer duration;
+    private Long duration;
 }

@@ -30,18 +30,18 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film newFilm) {
         log.debug("Валидация успешно пройдена!");
+        log.info("Новый фильм для обновления {}", newFilm.toString());
         if (newFilm.getId() == null || !films.containsKey(newFilm.getId())) {
             log.warn("Ошибка валидации : указан некорректный id");
             throw new ValidationException("Ошибка валидации : указан некорректный id");
         }
         Film film = films.get(newFilm.getId());
-
         film.setName(newFilm.getName());
         if (newFilm.getDescription() != null) {
             film.setDescription(newFilm.getDescription());
         }
         if (newFilm.getDuration() != null) {
-            film.setDescription(newFilm.getDescription());
+            film.setDuration(newFilm.getDuration());
         }
         if (newFilm.getReleaseDate() != null) {
             film.setReleaseDate(newFilm.getReleaseDate());

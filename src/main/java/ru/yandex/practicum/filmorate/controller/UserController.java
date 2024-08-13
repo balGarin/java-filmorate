@@ -38,12 +38,13 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody @Valid User newUser) {
         log.debug("Валидация успешно пройдена!");
+        log.info("Новый юзер для обновления {}", newUser.toString());
         if (newUser.getId() == null || !users.containsKey(newUser.getId())) {
             log.warn("Ошибка валидации : Некорректный Id");
             throw new ValidationException("Ошибка валидации : указан некорректный id");
         }
         User user = users.get(newUser.getId());
-        user.setLogin(user.getLogin());
+        user.setLogin(newUser.getLogin());
         if (newUser.getName() != null) {
             user.setName(newUser.getName());
         }
