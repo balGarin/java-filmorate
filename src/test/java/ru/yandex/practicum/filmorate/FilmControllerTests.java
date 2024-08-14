@@ -33,16 +33,12 @@ public class FilmControllerTests {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Film filmDescriptionOver200 = new Film();
         filmDescriptionOver200.setName("name");
-        filmDescriptionOver200.setDescription("123456789123456789123456789123456789123456789123456789123456789" +
-                "123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789" +
-                "123456789123456789123456789123456789123456789123456789123456789123456789123456789");
+        filmDescriptionOver200.setDescription("1".repeat(250));
         Set<ConstraintViolation<Film>> violations = validator.validate(filmDescriptionOver200);
         assertFalse(violations.isEmpty(), "Валидация пропустила описание свыше 200 символов");
         Film filmDescriptionExactly200 = new Film();
         filmDescriptionExactly200.setName("name");
-        filmDescriptionExactly200.setDescription("123456789012345678901234567890123456789012345678901234567890" +
-                "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
-                "12345678901234567890123456789012345678901234567890");
+        filmDescriptionExactly200.setDescription("1".repeat(200));
         violations = validator.validate(filmDescriptionExactly200);
         assertTrue(violations.isEmpty(), "Валидация граничного значения 200 работает не верно");
         Film filmDescriptionLess200 = new Film();
@@ -59,7 +55,7 @@ public class FilmControllerTests {
         filmReleaseEarlier1896.setName("name");
         filmReleaseEarlier1896.setReleaseDate(LocalDate.of(1885, 12, 12));
         Set<ConstraintViolation<Film>> violations = validator.validate(filmReleaseEarlier1896);
-        assertFalse(violations.isEmpty(), "Валидация не корректна при значение раньше 1896");
+        assertFalse(violations.isEmpty(), "Валидация не корректна при значение раньше 1895");
         Film filmReleaseExactly1895 = new Film();
         filmReleaseExactly1895.setName("name");
         filmReleaseExactly1895.setReleaseDate(LocalDate.of(1895, 12, 28));

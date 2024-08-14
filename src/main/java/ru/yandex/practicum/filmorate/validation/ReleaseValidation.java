@@ -6,16 +6,24 @@ import jakarta.validation.constraintvalidation.SupportedValidationTarget;
 import jakarta.validation.constraintvalidation.ValidationTarget;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 public class ReleaseValidation implements ConstraintValidator<ConsistentDateParameters, LocalDate> {
-    LocalDate bound = LocalDate.of(1895, 12, 27);
+    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDate bound;
 
     @Override
-    public boolean isValid(LocalDate release, ConstraintValidatorContext constraintValidatorContext) {
+    public void initialize(ConsistentDateParameters constraintAnnotation) {
+        bound = LocalDate.parse(constraintAnnotation.value(), dtf);
+    }
+
+    @Override
+    public boolean isValid(LocalDate release, ConstraintValidatorContext context) {
         if (release == null) {
             return true;
         }
-        return release.isAfter(bound);
+
+        return release.isAfter(bound) || release.equals(bound);
     }
 }

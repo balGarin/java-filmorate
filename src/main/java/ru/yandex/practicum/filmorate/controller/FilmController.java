@@ -14,7 +14,7 @@ import java.util.*;
 @RequestMapping("/films")
 @Validated()
 public class FilmController {
-    Map<Integer, Film> films = new HashMap<>();
+    private Map<Integer, Film> films = new HashMap<>();
     final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     @PostMapping

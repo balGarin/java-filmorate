@@ -16,7 +16,7 @@ public class Film {
     @Size(max = 200, message = "Описание не может превышать 200 символов !")
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @ConsistentDateParameters
+    @ConsistentDateParameters(value = "1895-12-28")
     private LocalDate releaseDate;
     @Positive(message = "Длительность должна быть положительным числом")
     private Integer duration;
