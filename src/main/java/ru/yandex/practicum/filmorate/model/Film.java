@@ -6,6 +6,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentDateParameters;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 
 @Data
@@ -20,4 +21,12 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Длительность должна быть положительным числом")
     private Integer duration;
+    private Set<Integer> likes;
+
+
+    public int getLikesSize() {
+        return likes.size();
+    }
+
+
 }

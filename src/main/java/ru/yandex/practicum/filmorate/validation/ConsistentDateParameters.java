@@ -18,7 +18,9 @@ public @interface ConsistentDateParameters {
 
     String message() default
             "Дата релиза не должна быть раньше {value}";
+
     String value();
+
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
