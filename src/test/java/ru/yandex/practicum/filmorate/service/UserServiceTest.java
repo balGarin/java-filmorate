@@ -22,8 +22,8 @@ class UserServiceTest {
         storage.addUser(friend);
         service.addFriend(user.getId(), friend.getId());
         assertEquals(1, user.getFriends().size(), "Добавление в друзья работает не корректно");
-        assertEquals(1, friend.getFriends().size()
-                , "У второго пользователя, добавление работает не корректно ");
+        assertEquals(1, friend.getFriends().size(),
+                "У второго пользователя, добавление работает не корректно ");
 
     }
 
