@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,13 +12,10 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 @Validated
+@AllArgsConstructor
 public class UserController {
+    private final UserService userService;
 
-    UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     public User addUser(@RequestBody @Valid User newUser) {

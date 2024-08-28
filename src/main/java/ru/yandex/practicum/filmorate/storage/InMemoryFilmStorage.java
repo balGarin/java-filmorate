@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -10,9 +9,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.*;
 
 @Component
+@Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private Map<Integer, Film> films = new HashMap<>();
-    final Logger log = LoggerFactory.getLogger(InMemoryFilmStorage.class);
 
     @Override
     public Film addFilm(Film newFilm) {
