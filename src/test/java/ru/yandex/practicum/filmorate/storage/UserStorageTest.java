@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate;
+package ru.yandex.practicum.filmorate.storage;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @SpringBootTest
-public class UserControllerTest {
+public class UserStorageTest {
     @Test
     public void shouldCorrectValidationEmail() {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

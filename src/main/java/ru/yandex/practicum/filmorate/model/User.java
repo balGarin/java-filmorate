@@ -6,6 +6,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentLoginParameters;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class User {
@@ -21,4 +22,7 @@ public class User {
     @Past(message = "Дата рождения не может быть в будущем!")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+    private Set<Integer> friends;
+
+
 }
