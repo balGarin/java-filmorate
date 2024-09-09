@@ -1,3 +1,7 @@
 # java-filmorate
 Template repository for Filmorate project.
-https://miro.com/app/board/uXjVKhKKT7o=/?share_link_id=162428608681
+
+
+---
+![DE - диаграмма БД к Filmorate project](https://disk.yandex.ru/i/GOA-G8gpqkjA4Q)
+
