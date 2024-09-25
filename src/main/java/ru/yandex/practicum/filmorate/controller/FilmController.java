@@ -12,7 +12,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/films")
-@Validated()
+@Validated
 @AllArgsConstructor
 public class FilmController {
 
@@ -34,6 +34,11 @@ public class FilmController {
     @GetMapping
     public List<Film> getAllFilms() {
         return filmService.getAllFilms();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilmByID(@PathVariable Integer id){
+        return  filmService.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")

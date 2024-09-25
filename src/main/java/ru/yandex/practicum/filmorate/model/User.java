@@ -6,12 +6,12 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentLoginParameters;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
 @Data
 public class User {
     private Integer id;
-
     private String name;
     @NotNull(message = "login не может быть пустым")
     @ConsistentLoginParameters
@@ -23,6 +23,6 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     private Set<Integer> friends;
-
-
 }
+
+
