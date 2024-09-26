@@ -32,16 +32,16 @@ class MPARepositoryTest {
         MPA mpaPG = new MPA();
         mpaPG.setId(2);
         mpaPG.setName("PG");
-        MPA PG13 = new MPA();
-        PG13.setId(3);
-        PG13.setName("PG-13");
+        MPA pg13 = new MPA();
+        pg13.setId(3);
+        pg13.setName("PG-13");
         MPA mpaR = new MPA();
         mpaR.setId(4);
         mpaR.setName("R");
-        MPA mpaNC17 = new MPA();
-        mpaNC17.setId(5);
-        mpaNC17.setName("NC-17");
-        List<MPA> ratings = List.of(mpaG, mpaPG, PG13, mpaR, mpaNC17);
+        MPA nc17 = new MPA();
+        nc17.setId(5);
+        nc17.setName("NC-17");
+        List<MPA> ratings = List.of(mpaG, mpaPG, pg13, mpaR, nc17);
         assertEquals(ratings.size(), mpaRepository.getAllMPA().size(), "Количество не корректно");
         assertEquals(ratings, mpaRepository.getAllMPA(), "Рейтинги отображаются не корректно");
     }
