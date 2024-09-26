@@ -25,7 +25,8 @@ public class Film {
     private Set<Integer> likes;
     private Set<Genre> genres;
     private MPA mpa;
-@JsonIgnore
+
+    @JsonIgnore
     public int getLikesSize() {
         return likes.size();
     }

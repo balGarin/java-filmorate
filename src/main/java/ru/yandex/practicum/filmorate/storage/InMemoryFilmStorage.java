@@ -14,9 +14,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
     private Map<Integer, Film> films = new HashMap<>();
-    private InMemoryUserStorage userStorage ;
-    public InMemoryFilmStorage(InMemoryUserStorage userStorage){
-        this.userStorage=userStorage;
+    private InMemoryUserStorage userStorage;
+
+    public InMemoryFilmStorage(InMemoryUserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     @Override
@@ -81,7 +82,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.debug("Новый id - {}", id);
         return ++id;
     }
-@Override
+
+    @Override
     public void addLike(Integer id, Integer userId) {
         Film film = getFilmById(id);
         User user = userStorage.getById(userId);
@@ -94,7 +96,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
-@Override
+    @Override
     public void deleteLike(Integer id, Integer userId) {
         Film film = getFilmById(id);
         User user = userStorage.getById(userId);
@@ -106,7 +108,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Лайк пользователя номер - {} удален для фильма номер - {}", userId, id);
     }
 
-@Override
+    @Override
     public List<Film> getMostPopularFilms(Integer count) {
         if (count < 0) {
             log.warn("Параметр count передан не верно - {}", count);

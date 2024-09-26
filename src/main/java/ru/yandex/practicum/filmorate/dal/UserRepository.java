@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.dal;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -92,6 +91,9 @@ public class UserRepository implements UserStorage {
     public List<User> getAllUsers() {
         List<User> users = jdbc.query(FIND_ALL_USERS, userRowMapper);
         for (User user : users) {
+            if (user.getName() == null) {
+                user.setName(user.getLogin());
+            }
             List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, user.getId());
             user.setFriends(new HashSet<>(friends));
         }
@@ -104,6 +106,9 @@ public class UserRepository implements UserStorage {
             User user = jdbc.queryForObject(FIND_USER_BY_ID, userRowMapper, id);
             List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, id);
             user.setFriends(new HashSet<>(friends));
+            if (user.getName() == null) {
+                user.setName(user.getLogin());
+            }
             return user;
         } catch (DataAccessException e) {
             throw new NotFoundException("Пользователь с " + id + " id не найден");
@@ -123,7 +128,8 @@ public class UserRepository implements UserStorage {
             throw new NotFoundException("Пользователь с ID = " + friendId + " не найден");
         }
         if (checkFriendship(id, friendId)) {
-            throw new IncorrectDataException("Пользователь с ID " + friendId + " уже в друзьях у пользователя с ID " + id);
+            throw new IncorrectDataException("Пользователь с ID " + friendId + " уже в друзьях у пользователя с ID "
+                    + id);
         }
         if (checkFriendship(friendId, id)) {
             insertForTwoKeys(ADD_FRIEND, id, friendId, 1);
@@ -145,9 +151,6 @@ public class UserRepository implements UserStorage {
         } catch (DataAccessException e) {
             throw new NotFoundException("Пользователь с ID = " + friendId + " не найден");
         }
-//        if(!checkFriendship(id,friendId)){
-//            throw new IncorrectDataException("Пользователь с ID "+friendId+" нет в друзьях у пользователя с ID "+id);
-//        }
         if (!checkFriendship(id, friendId)) {
             return;
         }
@@ -165,6 +168,9 @@ public class UserRepository implements UserStorage {
         List<User> friends = new ArrayList<>();
         for (Integer friendId : friendsId) {
             User user = jdbc.queryForObject(FIND_USER_BY_ID, userRowMapper, friendId);
+            if (user.getName() == null) {
+                user.setName(user.getLogin());
+            }
             List<Integer> userId = jdbc.query(GET_FRIENDS, friendRowMapper, friendId);
             user.setFriends(new HashSet<>(userId));
             friends.add(user);
@@ -179,6 +185,13 @@ public class UserRepository implements UserStorage {
         List<Integer> listOfUserFriends = jdbc.query(GET_FRIENDS, friendRowMapper, userid);
         List<Integer> listOfFriendFriends = jdbc.query(GET_FRIENDS, friendRowMapper, otherId);
         List<User> users = jdbc.query(FIND_ALL_USERS, userRowMapper);
+        for (User us : users) {
+            if (us.getName() == null) {
+                us.setName(us.getLogin());
+            }
+            List<Integer> userId = jdbc.query(GET_FRIENDS, friendRowMapper, otherId);
+            us.setFriends(new HashSet<>(userId));
+        }
         return users.stream()
                 .filter(user -> listOfUserFriends.contains(user.getId()))
                 .filter(user -> listOfFriendFriends.contains(user.getId()))

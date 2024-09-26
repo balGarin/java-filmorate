@@ -6,7 +6,6 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentLoginParameters;
 
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.Set;
 
 @Data

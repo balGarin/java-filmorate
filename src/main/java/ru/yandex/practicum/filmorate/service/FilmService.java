@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -15,7 +13,7 @@ import java.util.List;
 public class FilmService {
 
 
-    private  final FilmStorage filmStorage;
+    private final FilmStorage filmStorage;
 
     public FilmService(@Qualifier("DBFilms") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
@@ -39,16 +37,16 @@ public class FilmService {
 
 
     public void addLike(Integer id, Integer userId) {
-       filmStorage.addLike(id,userId);
+        filmStorage.addLike(id, userId);
     }
 
 
     public void deleteLike(Integer id, Integer userId) {
-       filmStorage.deleteLike(id,userId);
+        filmStorage.deleteLike(id, userId);
     }
 
 
     public List<Film> getMostPopularFilms(Integer count) {
-      return filmStorage.getMostPopularFilms(count);
+        return filmStorage.getMostPopularFilms(count);
     }
 }

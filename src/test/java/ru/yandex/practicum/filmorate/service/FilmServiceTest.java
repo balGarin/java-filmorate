@@ -16,7 +16,7 @@ class FilmServiceTest {
 
     @Test
     public void shouldCorrectAddLike() {
-       InMemoryUserStorage userStorage = new InMemoryUserStorage();
+        InMemoryUserStorage userStorage = new InMemoryUserStorage();
         InMemoryFilmStorage filmStorage = new InMemoryFilmStorage(userStorage);
         FilmService service = new FilmService(filmStorage);
         User user = new User();

@@ -24,7 +24,7 @@ public class MPAController {
 
     @GetMapping("/{id}")
     public MPA getMPAByID(@PathVariable Integer id) {
-        return  mpaRepository.getMPAByID(id);
+        return mpaRepository.getMPAByID(id);
     }
 
 }

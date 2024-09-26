@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -10,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Repository("InMemoryUsers")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
@@ -130,6 +130,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Запрос на получение общих друзей для : {} , {}  : {}", id, otherId, commonFriends);
         return commonFriends;
     }
+
     @Override
     public List<User> getListOfFriends(Integer id) {
         Set<Integer> friends = getById(id).getFriends();

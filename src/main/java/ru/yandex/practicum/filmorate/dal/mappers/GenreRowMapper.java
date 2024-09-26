@@ -6,13 +6,14 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 @Component
-public class GenreMapper implements RowMapper<Genre> {
+public class GenreRowMapper implements RowMapper<Genre> {
     @Override
     public Genre mapRow(ResultSet resultSet, int rowNum) throws SQLException {
         Genre genre = new Genre();
-       genre.setId(resultSet.getInt("GENRE_ID"));
-       genre.setName(resultSet.getString("GENRE_NAME"));
-       return genre;
+        genre.setId(resultSet.getInt("GENRE_ID"));
+        genre.setName(resultSet.getString("GENRE_NAME"));
+        return genre;
     }
 }

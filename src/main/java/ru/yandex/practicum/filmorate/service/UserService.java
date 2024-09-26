@@ -1,19 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -42,7 +37,7 @@ public class UserService {
     }
 
     public void addFriend(Integer id, Integer friendId) {
-       userStorage.addFriend(id, friendId);
+        userStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(Integer id, Integer friendId) {
@@ -50,18 +45,13 @@ public class UserService {
     }
 
     public List<User> getListOfFriends(Integer id) {
-      return  userStorage.getListOfFriends(id);
+        return userStorage.getListOfFriends(id);
     }
 
 
     public List<User> getListOfCommonFriends(Integer id, Integer otherId) {
         return userStorage.getListOfCommonFriends(id, otherId);
     }
-
-
-
-
-
 
 
 }
