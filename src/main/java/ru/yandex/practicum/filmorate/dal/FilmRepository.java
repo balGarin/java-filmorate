@@ -33,8 +33,6 @@ public class FilmRepository implements FilmStorage {
     private static final String ADD_FILM = "INSERT INTO FILMS (FILM_NAME,DESCRIPTION,RELEASEDATE,DURATION,RATING_ID)" +
             "VALUES(?,?,?,?,?)";
 
-    private static final String ADD_GENRE = "INSERT INTO FILMS_GENRES(FILM_ID,GENRE_ID)" +
-            "VALUES(?,?)";
 
     private static final String FIND_ALL_FILMS = "SELECT f.FILM_ID ,f.FILM_NAME ,f.DESCRIPTION ,f.RELEASEDATE " +
             ",f.DURATION , f.RATING_ID " +
@@ -94,9 +92,7 @@ public class FilmRepository implements FilmStorage {
                 film.getMpa().getId());
         film.setId(id);
         Set<Genre> genres = film.getGenres();
-        for (Genre genre : genres) {
-            insertForTwoKeys(ADD_GENRE, id, genre.getId());
-        }
+        addGenres(id, genres);
         return film;
 
     }
@@ -245,5 +241,20 @@ public class FilmRepository implements FilmStorage {
 
     public List<Integer> getLikes(Integer id) {
         return jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, id);
+    }
+
+    private void addGenres(Integer id, Set<Genre> genres) {
+        if (genres == null || genres.size() == 0) {
+            return;
+        }
+        String query = "INSERT INTO FILMS_GENRES(FILM_ID,GENRE_ID) VALUES ";
+
+        for (Genre genre : genres) {
+            String extraQuery = "( %s , %s),".formatted(id, genre.getId());
+            query = query + extraQuery;
+        }
+        query = query.substring(0, query.length() - 1);
+        System.out.println(query);
+        insertForTwoKeys(query);
     }
 }
