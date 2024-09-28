@@ -17,9 +17,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @AllArgsConstructor
 @Repository("DBFilms")
@@ -31,6 +29,7 @@ public class FilmRepository implements FilmStorage {
     private final GenreRowMapper genreRowMapper;
     private final UserRowMapper userRowMapper;
     private final LikeRowMapper likeRowMapper;
+    private final FilmFullRowMapper filmFullRowMapper;
     private static final String ADD_FILM = "INSERT INTO FILMS (FILM_NAME,DESCRIPTION,RELEASEDATE,DURATION,RATING_ID)" +
             "VALUES(?,?,?,?,?)";
 
@@ -46,8 +45,11 @@ public class FilmRepository implements FilmStorage {
             "FROM  FILMS f " +
             "WHERE f.FILM_ID = ?";
     private static final String FIND_MPA_BY_ID = "SELECT * FROM RATINGS WHERE RATING_ID = ?";
+
     private static final String FIND_GENRE_BY_FILM_ID = "SELECT g.GENRE_ID ,g.GENRE_NAME " +
             "FROM FILMS_GENRES fg JOIN GENRES g ON g.GENRE_ID =FG.GENRE_ID WHERE FG.FILM_ID = ?";
+
+
     private static final String UPDATE_FILM = "UPDATE FILMS SET FILM_ID =? , FILM_NAME = ? , DESCRIPTION = ?," +
             "DURATION = ?, RELEASEDATE = ?" +
             "WHERE FILM_ID = ?";
@@ -68,7 +70,14 @@ public class FilmRepository implements FilmStorage {
             "ORDER BY COUNT(l.USER_ID) DESC " +
             "LIMIT ?";
 
-    private static final String GET_LIST_OF_LIKES = "SELECT USER_ID FROM LIKES WHERE FILM_ID = ?";
+    private static final String GET_LIST_OF_LIKES_BY_Id = "SELECT USER_ID FROM LIKES WHERE FILM_ID = ?";
+    private static final String GET_ALL_FILMS_WITH_ALL_FIELDS = "SELECT f.FILM_ID,f.FILM_NAME,f.DESCRIPTION," +
+            "f.RELEASEDATE,f.DURATION,f.RATING_ID,r.RATING_NAME,g.GENRE_ID,g.GENRE_NAME " +
+            "FROM FILMS f " +
+            "JOIN FILMS_GENRES fg ON f.FILM_ID =fg.FILM_ID " +
+            "JOIN RATINGS r ON f.RATING_ID =r.RATING_ID " +
+            "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID ";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -108,19 +117,8 @@ public class FilmRepository implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        MPA mpa = new MPA();
         List<Film> films = jdbc.query(FIND_ALL_FILMS, filmRowMapper);
-        for (Film film : films) {
-            if (film.getMpa() != null) {
-                mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
-            }
-            film.setMpa(mpa);
-            List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
-            film.setGenres(new HashSet<>(genres));
-            List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES, likeRowMapper, film.getId());
-            film.setLikes(new HashSet<>(likes));
-        }
-        return films;
+        return fellFilms(films);
     }
 
     @Override
@@ -132,7 +130,7 @@ public class FilmRepository implements FilmStorage {
         }
         film.setMpa(mpa);
         List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
-        List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES, likeRowMapper, film.getId());
+        List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, film.getId());
         film.setLikes(new HashSet<>(likes));
         film.setGenres(new HashSet<>(genres));
         return film;
@@ -177,18 +175,8 @@ public class FilmRepository implements FilmStorage {
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
         List<Film> films = jdbc.query(GET_POPULAR, filmRowMapper, count);
-        MPA mpa = new MPA();
-        for (Film film : films) {
-            if (film.getMpa() != null) {
-                mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
-            }
-            film.setMpa(mpa);
-            List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
-            List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES, likeRowMapper, film.getId());
-            film.setLikes(new HashSet<>(likes));
-            film.setGenres(new HashSet<>(genres));
-        }
-        return films;
+        return fellFilms(films);
+
     }
 
 
@@ -235,5 +223,27 @@ public class FilmRepository implements FilmStorage {
         } catch (DataAccessException e) {
             throw new ValidationException(e.getMessage());
         }
+    }
+
+
+    private List<Film> fellFilms(List<Film> films) {
+        List<Film> filmsWithAllFields = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
+        for (Film rFilm : films) {
+            List<Genre> genres = new ArrayList<>();
+            MPA mpa = new MPA();
+            for (Film fFilm : filmsWithAllFields) {
+                if (rFilm.getId().equals(fFilm.getId())) {
+                    genres.addAll(fFilm.getGenres());
+                    mpa = fFilm.getMpa();
+                }
+            }
+            rFilm.setGenres(new HashSet<>(genres));
+            rFilm.setMpa(mpa);
+        }
+        return films;
+    }
+
+    public List<Integer> getLikes(Integer id) {
+        return jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, id);
     }
 }

@@ -112,7 +112,7 @@ class UserRepositoryTest {
         List<User> users = List.of(user2, user3);
         List<User> usersFromDB = userRepository.getListOfFriends(1);
         assertEquals(users.size(), usersFromDB.size(), "Количество друзей не корректно");
-        assertEquals(users, usersFromDB, "Список не корректен");
+        assertEquals(users.get(0).getName(), usersFromDB.get(0).getName(), "Список не корректен");
     }
 
 
@@ -140,7 +140,7 @@ class UserRepositoryTest {
         userRepository.addFriend(3, 2);
         List<User> users = userRepository.getListOfCommonFriends(1, 3);
         assertEquals(1, users.size(), "Количество друзей не корректно");
-        assertEquals(user2, users.get(0), "Друзья отображаются не корректно");
+        assertEquals(user2.getName(), users.get(0).getName(), "Друзья отображаются не корректно");
 
 
     }

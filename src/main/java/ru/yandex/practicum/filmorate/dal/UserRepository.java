@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -59,14 +58,18 @@ public class UserRepository implements UserStorage {
             "SET STATUS_ID= ? " +
             "WHERE USER_ID= ? AND FRIEND_ID = ?";
 
+    private static final String GET_ALL_FRIENDS = "SELECT u.USER_ID,u.EMAIL,u.LOGIN,u.USER_NAME,u.BIRTHDAY " +
+            "FROM USERS u  " +
+            "JOIN FRIENDS f ON u.USER_ID =f.FRIEND_ID " +
+            "WHERE f.USER_ID = ?";
+
     @Override
     public User addUser(User newUser) {
-        Integer id = insert(ADD_USER, newUser.getEmail(), newUser.getLogin(), newUser.getName(), newUser.getBirthday());
         if (newUser.getName() == null) {
             newUser.setName(newUser.getLogin());
         }
+        Integer id = insert(ADD_USER, newUser.getEmail(), newUser.getLogin(), newUser.getName(), newUser.getBirthday());
         newUser.setId(id);
-
         if (newUser.getFriends() == null) {
             newUser.setFriends(new HashSet<>());
         }
@@ -94,8 +97,6 @@ public class UserRepository implements UserStorage {
             if (user.getName() == null) {
                 user.setName(user.getLogin());
             }
-            List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, user.getId());
-            user.setFriends(new HashSet<>(friends));
         }
         return users;
     }
@@ -151,50 +152,35 @@ public class UserRepository implements UserStorage {
         } catch (DataAccessException e) {
             throw new NotFoundException("Пользователь с ID = " + friendId + " не найден");
         }
-        if (!checkFriendship(id, friendId)) {
-            return;
+        if (checkFriendship(id, friendId)) {
+            Integer status = jdbc.queryForObject(GET_STATUS, statusRowMapper, id, friendId);
+            if (status.equals(1)) {
+                jdbc.update(UPDATE_STATUS, 2, friendId, id);
+            }
+            jdbc.update(DELETE_FRIEND, id, friendId);
         }
-        Integer status = jdbc.queryForObject(GET_STATUS, statusRowMapper, id, friendId);
-        if (status.equals(1)) {
-            jdbc.update(UPDATE_STATUS, 2, friendId, id);
-        }
-        jdbc.update(DELETE_FRIEND, id, friendId);
     }
 
     @Override
     public List<User> getListOfFriends(Integer id) {
         getById(id);
-        List<Integer> friendsId = jdbc.query(GET_FRIENDS, friendRowMapper, id);
-        List<User> friends = new ArrayList<>();
-        for (Integer friendId : friendsId) {
-            User user = jdbc.queryForObject(FIND_USER_BY_ID, userRowMapper, friendId);
+        List<User> friends = jdbc.query(GET_ALL_FRIENDS, userRowMapper, id);
+        for (User user : friends) {
             if (user.getName() == null) {
                 user.setName(user.getLogin());
             }
-            List<Integer> userId = jdbc.query(GET_FRIENDS, friendRowMapper, friendId);
-            user.setFriends(new HashSet<>(userId));
-            friends.add(user);
         }
         return friends;
-
-
     }
 
     @Override
     public List<User> getListOfCommonFriends(Integer userid, Integer otherId) {
-        List<Integer> listOfUserFriends = jdbc.query(GET_FRIENDS, friendRowMapper, userid);
-        List<Integer> listOfFriendFriends = jdbc.query(GET_FRIENDS, friendRowMapper, otherId);
+        List<User> listOfUserFriends = jdbc.query(GET_ALL_FRIENDS, userRowMapper, userid);
+        List<User> listOfFriendFriends = jdbc.query(GET_ALL_FRIENDS, userRowMapper, otherId);
         List<User> users = jdbc.query(FIND_ALL_USERS, userRowMapper);
-        for (User us : users) {
-            if (us.getName() == null) {
-                us.setName(us.getLogin());
-            }
-            List<Integer> userId = jdbc.query(GET_FRIENDS, friendRowMapper, otherId);
-            us.setFriends(new HashSet<>(userId));
-        }
         return users.stream()
-                .filter(user -> listOfUserFriends.contains(user.getId()))
-                .filter(user -> listOfFriendFriends.contains(user.getId()))
+                .filter(listOfUserFriends::contains)
+                .filter(listOfFriendFriends::contains)
                 .toList();
     }
 

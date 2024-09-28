@@ -41,6 +41,3 @@ VALUES ('Комедия'),
     VALUES ('Подтверждённая'),
         ('Неподтверждённая');
     ALTER TABLE STATUSES ALTER COLUMN STATUS_ID RESTART WITH 3;
-
-
-
