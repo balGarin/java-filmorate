@@ -254,7 +254,6 @@ public class FilmRepository implements FilmStorage {
             query = query + extraQuery;
         }
         query = query.substring(0, query.length() - 1);
-        System.out.println(query);
         insertForTwoKeys(query);
     }
 }
