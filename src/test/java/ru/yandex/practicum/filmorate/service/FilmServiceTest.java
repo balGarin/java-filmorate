@@ -17,8 +17,8 @@ class FilmServiceTest {
     @Test
     public void shouldCorrectAddLike() {
         InMemoryUserStorage userStorage = new InMemoryUserStorage();
-        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
-        FilmService service = new FilmService(filmStorage, userStorage);
+        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage(userStorage);
+        FilmService service = new FilmService(filmStorage);
         User user = new User();
         user.setLogin("login");
         user.setEmail("yandex@gmai.ru");
@@ -26,7 +26,7 @@ class FilmServiceTest {
         Film film = new Film();
         film.setName("name");
         filmStorage.addFilm(film);
-        service.addLike(film.getId(), user.getId());
+        service.addLike(filmStorage.getFilmById(1).getId(), userStorage.getById(1).getId());
         assertEquals(1, film.getLikesSize(), "Количество лайков не корректно");
         boolean exceptionThrown = false;
         try {
@@ -41,8 +41,8 @@ class FilmServiceTest {
     @Test
     public void shouldCorrectDeleteLike() {
         InMemoryUserStorage userStorage = new InMemoryUserStorage();
-        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
-        FilmService service = new FilmService(filmStorage, userStorage);
+        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage(userStorage);
+        FilmService service = new FilmService(filmStorage);
         User user = new User();
         user.setLogin("login");
         user.setEmail("yandex@gmai.ru");
@@ -59,8 +59,8 @@ class FilmServiceTest {
     @Test
     public void shouldCorrectMappingPopularFilms() {
         InMemoryUserStorage userStorage = new InMemoryUserStorage();
-        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
-        FilmService service = new FilmService(filmStorage, userStorage);
+        InMemoryFilmStorage filmStorage = new InMemoryFilmStorage(userStorage);
+        FilmService service = new FilmService(filmStorage);
         User user1 = new User();
         user1.setLogin("login");
         user1.setEmail("yandex@gmai.ru");

@@ -11,7 +11,6 @@ import java.util.Set;
 @Data
 public class User {
     private Integer id;
-
     private String name;
     @NotNull(message = "login не может быть пустым")
     @ConsistentLoginParameters
@@ -23,6 +22,6 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
     private Set<Integer> friends;
-
-
 }
+
+
