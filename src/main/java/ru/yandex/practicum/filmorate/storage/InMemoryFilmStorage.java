@@ -122,4 +122,26 @@ public class InMemoryFilmStorage implements FilmStorage {
         return popularFilm;
     }
 
+    /**
+     * Вывод самых популярных фильмов по жанру и годам, 3 метода.
+     *
+     * @param count   количество топ фильмов, 10 по умолчанию,
+     * @param genreId айди жанра, для фильтрации по жанру,
+     * @param year    год выходы фильма, для фильтрации по году,
+     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
+     */
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
+        return null;
+    }
 }

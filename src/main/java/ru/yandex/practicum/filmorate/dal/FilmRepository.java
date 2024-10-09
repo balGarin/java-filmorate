@@ -76,6 +76,49 @@ public class FilmRepository implements FilmStorage {
             "JOIN RATINGS r ON f.RATING_ID =r.RATING_ID " +
             "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID ";
 
+    private static final String GET_POPULAR_FILM_ON_GENRES = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            "WHERE f.FILM_ID IN (" +
+            "SELECT id FROM (" +
+            "SELECT f.FILM_ID id, l.USER_ID " +
+            "FROM FILMS f " +
+            "JOIN FILMS_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
+            "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID " +
+            "LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            "WHERE g.GENRE_ID = ? " +
+            "GROUP BY f.FILM_ID " +
+            "ORDER BY count(l.USER_ID) DESC " +
+            "LIMIT ?) " +
+            ")";
+
+    private static final String GET_POPULAR_FILM_ON_YEAR = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            "WHERE f.FILM_ID IN (" +
+            "SELECT id FROM (" +
+            "SELECT f.FILM_ID id, l.USER_ID " +
+            "FROM FILMS f " +
+            "JOIN FILMS_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
+            "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID " +
+            "LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            "WHERE EXTRACT(YEAR FROM CAST(f.RELEASEDATE AS date)) = ? " +
+            "GROUP BY f.FILM_ID " +
+            "ORDER BY count(l.USER_ID) DESC " +
+            "LIMIT ?) " +
+            ")";
+
+    private static final String GET_POPULAR_FILMS_ON_GENRE_AND_YEAR = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            "WHERE f.FILM_ID IN (" +
+            "SELECT id FROM (" +
+            "SELECT f.FILM_ID id, l.USER_ID " +
+            "FROM FILMS f " +
+            "JOIN FILMS_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
+            "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID " +
+            "LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            "WHERE EXTRACT(YEAR FROM CAST(f.RELEASEDATE AS date)) = ? " +
+            "AND g.GENRE_ID = ? " +
+            "GROUP BY f.FILM_ID " +
+            "ORDER BY count(l.USER_ID) DESC " +
+            "LIMIT ?) " +
+            ")";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -175,6 +218,31 @@ public class FilmRepository implements FilmStorage {
 
     }
 
+    /**
+     * Вывод самых популярных фильмов по жанру и годам, 3 метода.
+     *
+     * @param count   количество топ фильмов, 10 по умолчанию,
+     * @param genreId айди жанра, для фильтрации по жанру,
+     * @param year    год выходы фильма, для фильтрации по году,
+     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
+     */
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        List<Film> films = jdbc.query(GET_POPULAR_FILMS_ON_GENRE_AND_YEAR, filmFullRowMapper, year, genreId, count);
+        return films;
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
+        List<Film> films = jdbc.query(GET_POPULAR_FILM_ON_GENRES, filmFullRowMapper, genreId, count);
+        return films;
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
+        List<Film> films = jdbc.query(GET_POPULAR_FILM_ON_YEAR, filmFullRowMapper, year, count);
+        return fellFilms(films);
+    }
 
     private void insertForTwoKeys(String query, Object... params) {
         try {
