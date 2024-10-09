@@ -51,9 +51,19 @@ public class FilmController {
         filmService.deleteLike(id, userId);
     }
 
+    /**
+     * Вывод самых популярных фильмов по жанру и годам.
+     *
+     * @param count   количество топ фильмов, 10 по умолчанию,
+     * @param genreId айди жанра, для фильтрации по жанру,
+     * @param year    год выходы фильма, для фильтрации по году,
+     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
+     */
     @GetMapping("/popular")
-    public List<Film> getMostPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count) {
-        return filmService.getMostPopularFilms(count);
+    public List<Film> getMostPopularFilms(@RequestParam(required = false, defaultValue = "10") Integer count,
+                                          @RequestParam Optional<Integer> genreId,
+                                          @RequestParam Optional<Integer> year) {
+        return filmService.getMostPopular(count, genreId, year);
     }
 
     @DeleteMapping("{id}")

@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 
@@ -52,5 +53,25 @@ public class FilmService {
 
     public  void  deleteFilmById(Integer id){
         filmStorage.deleteFilmById(id);
+    }
+
+    /**
+     * Вывод самых популярных фильмов по жанру и году или отдельно год, и отдельно жанр.
+     *
+     * @param count   количество топ фильмов, 10 по умолчанию,
+     * @param genreId айди жанра, для фильтрации по жанру,
+     * @param year    год выходы фильма, для фильтрации по году,
+     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
+     */
+    public List<Film> getMostPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        if (genreId.isEmpty() && year.isEmpty()) {
+            return filmStorage.getMostPopularFilms(count);
+        } else if (year.isEmpty()) {
+            return filmStorage.getPopularFilmsByGenre(count, genreId.get());
+        } else if (genreId.isEmpty()) {
+            return filmStorage.getPopularFilmsByYear(count, year.get());
+        } else {
+            return filmStorage.getPopularFilmsOnGenreAndYear(count, genreId.get(), year.get());
+        }
     }
 }
