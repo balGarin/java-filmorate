@@ -76,6 +76,8 @@ public class FilmRepository implements FilmStorage {
             "JOIN RATINGS r ON f.RATING_ID =r.RATING_ID " +
             "JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID ";
 
+    private  static  final String DELETE_FILM_BY_ID ="";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -220,8 +222,6 @@ public class FilmRepository implements FilmStorage {
             throw new ValidationException(e.getMessage());
         }
     }
-
-
     private List<Film> fellFilms(List<Film> films) {
         List<Film> filmsWithAllFields = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
         for (Film rFilm : films) {
@@ -255,5 +255,9 @@ public class FilmRepository implements FilmStorage {
         }
         query = query.substring(0, query.length() - 1);
         insertForTwoKeys(query);
+    }
+    @Override
+    public void deleteFilmById(Integer id){
+
     }
 }

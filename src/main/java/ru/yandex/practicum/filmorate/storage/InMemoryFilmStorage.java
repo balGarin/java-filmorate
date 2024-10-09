@@ -122,4 +122,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return popularFilm;
     }
 
+    @Override
+    public void deleteFilmById(Integer id) {
+
+    }
 }

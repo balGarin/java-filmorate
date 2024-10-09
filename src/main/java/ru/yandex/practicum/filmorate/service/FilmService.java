@@ -49,4 +49,8 @@ public class FilmService {
     public List<Film> getMostPopularFilms(Integer count) {
         return filmStorage.getMostPopularFilms(count);
     }
+
+    public  void  deleteFilmById(Integer id){
+        filmStorage.deleteFilmById(id);
+    }
 }
