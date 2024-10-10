@@ -122,6 +122,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return popularFilm;
     }
 
+    @Override
+    public void deleteFilmById(Integer id) {
+
+    }
+
     /**
      * Вывод самых популярных фильмов по жанру и годам, 3 метода.
      *

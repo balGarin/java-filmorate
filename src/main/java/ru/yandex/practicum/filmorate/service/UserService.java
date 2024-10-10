@@ -54,4 +54,7 @@ public class UserService {
     }
 
 
+    public void deleteUserById(Integer id) {
+        userStorage.deleteUserById(id);
+    }
 }

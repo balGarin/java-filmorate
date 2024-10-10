@@ -20,6 +20,8 @@ public interface FilmStorage {
 
     List<Film> getMostPopularFilms(Integer count);
 
+    void deleteFilmById(Integer id);
+
     /**
      * Вывод самых популярных фильмов по жанру и годам, 3 метода.
      *

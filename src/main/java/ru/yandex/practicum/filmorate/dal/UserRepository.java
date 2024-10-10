@@ -63,6 +63,9 @@ public class UserRepository implements UserStorage {
             "JOIN FRIENDS f ON u.USER_ID =f.FRIEND_ID " +
             "WHERE f.USER_ID = ?";
 
+    private static final String DELETE_USER_BY_ID = "DELETE FROM USERS " +
+            "WHERE USER_ID = ?";
+
     @Override
     public User addUser(User newUser) {
         if (newUser.getName() == null) {
@@ -233,5 +236,13 @@ public class UserRepository implements UserStorage {
         List<Integer> friendsOfUser = jdbc.query(GET_FRIENDS, friendRowMapper, userId);
         return friendsOfUser.stream()
                 .anyMatch(id -> id.equals(friendId));
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        int rowDeleted = jdbc.update(DELETE_USER_BY_ID, id);
+        if (rowDeleted == 0) {
+            throw new NotFoundException("Пользователь не найден");
+        }
     }
 }

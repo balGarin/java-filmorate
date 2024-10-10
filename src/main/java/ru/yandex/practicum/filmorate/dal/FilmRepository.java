@@ -63,7 +63,7 @@ public class FilmRepository implements FilmStorage {
     private static final String GET_POPULAR = "SELECT f.FILM_ID ,f.FILM_NAME ,f.DESCRIPTION ,f.RELEASEDATE ," +
             "f.DURATION , f.RATING_ID   " +
             "FROM  FILMS f " +
-            "JOIN LIKES l ON f.FILM_ID =l.FILM_ID " +
+            "LEFT JOIN LIKES l ON f.FILM_ID =l.FILM_ID " +
             "GROUP  BY f.FILM_ID  " +
             "ORDER BY COUNT(l.USER_ID) DESC " +
             "LIMIT ?";
@@ -119,6 +119,9 @@ public class FilmRepository implements FilmStorage {
             "LIMIT ?) " +
             ")";
 
+    private static final String DELETE_FILM_BY_ID = "DELETE FROM FILMS " +
+            "WHERE FILM_ID=?";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -163,16 +166,20 @@ public class FilmRepository implements FilmStorage {
     @Override
     public Film getFilmById(Integer id) {
         MPA mpa = new MPA();
-        Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
-        if (film.getMpa() != null) {
-            mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
+        try {
+            Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
+            if (film.getMpa() != null) {
+                mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
+            }
+            film.setMpa(mpa);
+            List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
+            List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, film.getId());
+            film.setLikes(new HashSet<>(likes));
+            film.setGenres(new HashSet<>(genres));
+            return film;
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Фильм c ID " + id + " не найден");
         }
-        film.setMpa(mpa);
-        List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
-        List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, film.getId());
-        film.setLikes(new HashSet<>(likes));
-        film.setGenres(new HashSet<>(genres));
-        return film;
 
 
     }
@@ -289,7 +296,6 @@ public class FilmRepository implements FilmStorage {
         }
     }
 
-
     private List<Film> fellFilms(List<Film> films) {
         List<Film> filmsWithAllFields = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
         for (Film rFilm : films) {
@@ -323,5 +329,13 @@ public class FilmRepository implements FilmStorage {
         }
         query = query.substring(0, query.length() - 1);
         insertForTwoKeys(query);
+    }
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        int rowDeleted = jdbc.update(DELETE_FILM_BY_ID, id);
+        if (rowDeleted == 0) {
+            throw new NotFoundException("Фильм не найден");
+        }
     }
 }

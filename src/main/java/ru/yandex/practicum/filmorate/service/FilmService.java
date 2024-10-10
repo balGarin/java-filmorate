@@ -51,6 +51,10 @@ public class FilmService {
         return filmStorage.getMostPopularFilms(count);
     }
 
+    public void deleteFilmById(Integer id) {
+        filmStorage.deleteFilmById(id);
+    }
+
     /**
      * Вывод самых популярных фильмов по жанру и году или отдельно год, и отдельно жанр.
      *
