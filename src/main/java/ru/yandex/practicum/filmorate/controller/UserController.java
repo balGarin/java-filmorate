@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.*;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
 
 
     @PostMapping
@@ -55,7 +58,17 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getListOfCommonFriends(id, otherId);
+    }
 
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param id полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable Long id) {
+        return filmService.getRecommendations(id);
     }
 
     @DeleteMapping("/{id}")

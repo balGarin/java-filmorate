@@ -53,8 +53,8 @@ public class UserService {
         return userStorage.getListOfCommonFriends(id, otherId);
     }
 
-
     public void deleteUserById(Integer id) {
         userStorage.deleteUserById(id);
     }
+
 }

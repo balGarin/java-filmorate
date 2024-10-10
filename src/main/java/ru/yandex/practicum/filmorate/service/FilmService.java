@@ -74,4 +74,14 @@ public class FilmService {
             return filmStorage.getPopularFilmsOnGenreAndYear(count, genreId.get(), year.get());
         }
     }
+
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param userId полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    public List<Film> getRecommendations(Long userId) {
+        return filmStorage.getRecommendations(userId);
+    }
 }

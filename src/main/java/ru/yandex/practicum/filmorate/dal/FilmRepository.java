@@ -122,6 +122,30 @@ public class FilmRepository implements FilmStorage {
     private static final String DELETE_FILM_BY_ID = "DELETE FROM FILMS " +
             "WHERE FILM_ID=?";
 
+    private static final String GET_RECOMMENDATIONS = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            "WHERE f.FILM_ID IN (" +
+            /* Поиск фильмов которые лайкнули другие пользователи, но не лайкнул пользователь */
+            "SELECT FILM_ID FROM LIKES " +
+            "WHERE USER_ID IN " +
+            "(" +
+            /* Поиск максимального совпадений по лайкам пользователя с другими пользователями */
+            "SELECT likes.USER_ID FROM LIKES likes " +
+            "RIGHT JOIN LIKES likesUser ON likesUser.FiLM_ID = likes.FiLM_ID " +
+            "GROUP BY likes.USER_ID, likesUser.USER_ID " +
+            "HAVING likes.USER_ID IS NOT NULL " +
+            "AND likes.USER_ID != ? " +
+            "AND likesUser.USER_ID = ? " +
+            "ORDER BY count(likes.USER_ID) DESC " +
+            "LIMIT 10 " +
+            ") " +
+            /* Поиск фильмов которые не лайкал(не посмотрел) пользователь */
+            "AND FILM_ID NOT IN " +
+            "(" +
+            "SELECT FILM_ID FROM LIKES " +
+            "WHERE USER_ID = ? " +
+            ") " +
+            ")";
+
 
     @Override
     public Film addFilm(Film film) {
@@ -337,5 +361,17 @@ public class FilmRepository implements FilmStorage {
         if (rowDeleted == 0) {
             throw new NotFoundException("Фильм не найден");
         }
+    }
+
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param userId полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    @Override
+    public List<Film> getRecommendations(Long userId) {
+        List<Film> films = jdbc.query(GET_RECOMMENDATIONS, filmFullRowMapper, userId, userId, userId);
+        return films;
     }
 }

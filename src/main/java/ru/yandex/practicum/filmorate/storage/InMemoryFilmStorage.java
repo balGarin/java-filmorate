@@ -149,4 +149,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
         return null;
     }
+
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param userId полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    @Override
+    public List<Film> getRecommendations(Long userId) {
+        return null;
+    }
 }
