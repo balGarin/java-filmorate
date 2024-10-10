@@ -35,4 +35,12 @@ public interface FilmStorage {
     List<Film> getPopularFilmsByGenre(Integer count, Integer genreId);
 
     List<Film> getPopularFilmsByYear(Integer count, Integer year);
+
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param userId полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    List<Film> getRecommendations(Long userId);
 }
