@@ -30,6 +30,8 @@ public class FilmRepository implements FilmStorage {
     private final FilmFullRowMapper filmFullRowMapper;
     private final DirectorRowMapper directorRowMapper;
     private final FilmRowMapperWithDir filmRowMapperWithDir;
+    private final FilmRowMapperCommon filmRowMapperCommon;
+
     private static final String ADD_FILM = "INSERT INTO FILMS (FILM_NAME,DESCRIPTION,RELEASEDATE,DURATION,RATING_ID)" +
             "VALUES(?,?,?,?,?)";
 
@@ -172,6 +174,39 @@ public class FilmRepository implements FilmStorage {
             "WHERE d.DIRECTOR_ID = ? " +
             "GROUP  BY f.FILM_ID  " +
             "ORDER BY COUNT(l.USER_ID) DESC ";
+
+    private static final String FIND_COMMON_FILMS_SORTED_BY_LIKES = """
+                    SELECT F.FILM_ID,
+                           F.FILM_NAME,
+                           F.DESCRIPTION,
+                           F.RELEASEDATE,
+                           F.DURATION,
+                           F.RATING_ID,
+                           R.RATING_NAME,
+                           LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+                           LISTAGG(DISTINCT FL.USER_ID) AS LIKES
+                    FROM FILMS F
+                    LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+                    LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+                    LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+                    LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+                    WHERE F.FILM_ID IN (
+                        SELECT FILM_ID,
+                        FROM LIKES l
+                        WHERE USER_ID = ? OR USER_ID = ?
+                        GROUP BY FILM_ID
+                        HAVING COUNT(*) = 2
+                    )
+                    GROUP BY F.FILM_ID,
+                             F.FILM_NAME,
+                             F.DESCRIPTION,
+                             F.RELEASEDATE,
+                             F.DURATION,
+                             F.RATING_ID,
+                             R.RATING_NAME
+                    ORDER BY COUNT(DISTINCT FL.USER_ID) DESC
+                    """;
+
 
     @Override
     public Film addFilm(Film film) {
@@ -436,6 +471,13 @@ public class FilmRepository implements FilmStorage {
         } else {
             throw new IncorrectDataException("Не верный запрос");
         }
+        return films;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        List<Film> films;
+        films = jdbc.query(FIND_COMMON_FILMS_SORTED_BY_LIKES, filmRowMapperCommon, userId, friendId);
         return films;
     }
 }
