@@ -15,9 +15,7 @@ import java.util.*;
 @Validated
 @AllArgsConstructor
 public class FilmController {
-
     private final FilmService filmService;
-
 
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film newFilm) {
@@ -66,6 +64,7 @@ public class FilmController {
         return filmService.getMostPopular(count, genreId, year);
     }
 
+
     @DeleteMapping("{id}")
     public void deleteFilmByID(@PathVariable Integer id) {
         filmService.deleteFilmById(id);
@@ -75,6 +74,12 @@ public class FilmController {
     public List<Film> getFilmsSortedByDirector(@PathVariable Integer directorId, @RequestParam String sortBy) {
         return filmService.getFilmsSortedByDirector(directorId, sortBy);
     }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
 }
 
 
