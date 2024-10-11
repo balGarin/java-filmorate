@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentDateParameters;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ public class Film {
     private Set<Integer> likes;
     private Set<Genre> genres;
     private MPA mpa;
+    private Set<Director> directors;
 
     @JsonIgnore
     public int getLikesSize() {
