@@ -184,6 +184,9 @@ public class FilmRepository implements FilmStorage {
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
         }
+        if(film.getDirectors()==null){
+            film.setDirectors(new HashSet<>());
+        }
         Integer id = insert(ADD_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId());
         film.setId(id);
