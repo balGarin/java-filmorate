@@ -16,27 +16,27 @@ public class DirectorController {
     private final DirectorRepository directorRepository;
 
     @GetMapping
-    public List<Director> getAllDirectors(){
-       return directorRepository.getAllDirectors();
+    public List<Director> getAllDirectors() {
+        return directorRepository.getAllDirectors();
     }
 
     @GetMapping("/{id}")
-    public Director getDirectorById(@PathVariable Integer id){
+    public Director getDirectorById(@PathVariable Integer id) {
         return directorRepository.getDirectorById(id);
     }
 
     @PostMapping
-    public Director addDirector(@RequestBody Director newDirector){
+    public Director addDirector(@RequestBody Director newDirector) {
         return directorRepository.addDirector(newDirector);
     }
 
     @PutMapping
-    public Director updateDirector(@RequestBody Director newDirector){
+    public Director updateDirector(@RequestBody Director newDirector) {
         return directorRepository.updateDirector(newDirector);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDirector(@PathVariable Integer id){
-       directorRepository.deleteDirectorById(id);
+    public void deleteDirector(@PathVariable Integer id) {
+        directorRepository.deleteDirectorById(id);
     }
 }

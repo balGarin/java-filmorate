@@ -84,4 +84,8 @@ public class FilmService {
     public List<Film> getRecommendations(Long userId) {
         return filmStorage.getRecommendations(userId);
     }
+
+    public List<Film> getFilmsSortedByDirector(Integer directorId,String sortBy) {
+        return filmStorage.getFilmsSortedByDirector(directorId,sortBy);
+    }
 }

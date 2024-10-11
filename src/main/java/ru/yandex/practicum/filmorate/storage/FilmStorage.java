@@ -43,4 +43,6 @@ public interface FilmStorage {
      * @return возврщает список фильмов
      */
     List<Film> getRecommendations(Long userId);
+
+    List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy);
 }
