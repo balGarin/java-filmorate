@@ -15,7 +15,10 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Repository("DBFilms")
@@ -76,11 +79,13 @@ public class FilmRepository implements FilmStorage {
 
     private static final String GET_LIST_OF_LIKES_BY_Id = "SELECT USER_ID FROM LIKES WHERE FILM_ID = ?";
     private static final String GET_ALL_FILMS_WITH_ALL_FIELDS = "SELECT f.FILM_ID,f.FILM_NAME,f.DESCRIPTION," +
-            "f.RELEASEDATE,f.DURATION,f.RATING_ID,r.RATING_NAME,g.GENRE_ID,g.GENRE_NAME " +
+            "f.RELEASEDATE,f.DURATION,f.RATING_ID,r.RATING_NAME,g.GENRE_ID,g.GENRE_NAME, d.DIRECTOR_ID, d.DIRECTOR_NAME " +
             "FROM FILMS f " +
-            " JOIN FILMS_GENRES fg ON f.FILM_ID =fg.FILM_ID " +
-            " JOIN RATINGS r ON f.RATING_ID =r.RATING_ID " +
-            " JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID ";
+            "LEFT JOIN FILMS_GENRES fg ON f.FILM_ID = fg.FILM_ID " +
+            "LEFT JOIN RATINGS r ON f.RATING_ID =r.RATING_ID " +
+            "LEFT JOIN GENRES g ON fg.GENRE_ID = g.GENRE_ID " +
+            "LEFT JOIN DIRECTORS_FILMS df ON f.FILM_ID = df.FILM_ID " +
+            "LEFT JOIN DIRECTORS d ON df.DIRECTOR_ID = d.DIRECTOR_ID ";
 
     private static final String GET_POPULAR_FILM_ON_GENRES = GET_ALL_FILMS_WITH_ALL_FIELDS +
             "WHERE f.FILM_ID IN (" +
@@ -176,37 +181,49 @@ public class FilmRepository implements FilmStorage {
             "ORDER BY COUNT(l.USER_ID) DESC ";
 
     private static final String FIND_COMMON_FILMS_SORTED_BY_LIKES = """
-                    SELECT F.FILM_ID,
-                           F.FILM_NAME,
-                           F.DESCRIPTION,
-                           F.RELEASEDATE,
-                           F.DURATION,
-                           F.RATING_ID,
-                           R.RATING_NAME,
-                           LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
-                           LISTAGG(DISTINCT FL.USER_ID) AS LIKES
-                    FROM FILMS F
-                    LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
-                    LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
-                    LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
-                    LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
-                    WHERE F.FILM_ID IN (
-                        SELECT FILM_ID,
-                        FROM LIKES l
-                        WHERE USER_ID = ? OR USER_ID = ?
-                        GROUP BY FILM_ID
-                        HAVING COUNT(*) = 2
-                    )
-                    GROUP BY F.FILM_ID,
-                             F.FILM_NAME,
-                             F.DESCRIPTION,
-                             F.RELEASEDATE,
-                             F.DURATION,
-                             F.RATING_ID,
-                             R.RATING_NAME
-                    ORDER BY COUNT(DISTINCT FL.USER_ID) DESC
-                    """;
+            SELECT F.FILM_ID,
+                   F.FILM_NAME,
+                   F.DESCRIPTION,
+                   F.RELEASEDATE,
+                   F.DURATION,
+                   F.RATING_ID,
+                   R.RATING_NAME,
+                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES
+            FROM FILMS F
+            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+            WHERE F.FILM_ID IN (
+                SELECT FILM_ID,
+                FROM LIKES l
+                WHERE USER_ID = ? OR USER_ID = ?
+                GROUP BY FILM_ID
+                HAVING COUNT(*) = 2
+            )
+            GROUP BY F.FILM_ID,
+                     F.FILM_NAME,
+                     F.DESCRIPTION,
+                     F.RELEASEDATE,
+                     F.DURATION,
+                     F.RATING_ID,
+                     R.RATING_NAME
+            ORDER BY COUNT(DISTINCT FL.USER_ID) DESC
+            """;
 
+    private static final String SEARCH_FILM_BY_TITLE = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            " WHERE f.FILM_NAME LIKE ? " +
+            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
+    private static final String SEARCH_FILM_BY_DIRECTOR = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            " WHERE d.DIRECTOR_NAME LIKE ? " +
+            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";;
+    private static final String SEARCH_FILM_BY_DIRECTOR_AND_TITLE = GET_ALL_FILMS_WITH_ALL_FIELDS +
+            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+            " WHERE (d.DIRECTOR_NAME LIKE ? OR  f.FILM_NAME LIKE ?) " +
+            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
 
     @Override
     public Film addFilm(Film film) {
@@ -479,5 +496,27 @@ public class FilmRepository implements FilmStorage {
         List<Film> films;
         films = jdbc.query(FIND_COMMON_FILMS_SORTED_BY_LIKES, filmRowMapperCommon, userId, friendId);
         return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String query) {
+        List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR, filmFullRowMapper, query);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        List<Film> films = jdbc.query(SEARCH_FILM_BY_TITLE, filmFullRowMapper, query);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmByNameAndDirector(String query) {
+        try {
+            List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR_AND_TITLE, filmFullRowMapper, query, query);
+            return films;
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -31,12 +32,14 @@ public class FilmFullRowMapper implements RowMapper<Film> {
         genre.setName(resultSet.getString(9));
         genres.add(genre);
         film.setGenres(genres);
-//        Set<Director>directors = new HashSet<>();
-//        Director director = new Director();
-//        director.setId(resultSet.getInt(10));
-//        director.setName(resultSet.getString(11));
-//        directors.add(director);
-//        film.setDirectors(directors);
+        Set<Director> directors = new HashSet<>();
+        if (resultSet.getInt("DIRECTOR_ID") != 0 && !resultSet.getString("DIRECTOR_NAME").equals(null)) {
+            Director director = new Director();
+            director.setId(resultSet.getInt("DIRECTOR_ID"));
+            director.setName(resultSet.getString("DIRECTOR_NAME"));
+            directors.add(director);
+        }
+        film.setDirectors(directors);
         return film;
     }
 }

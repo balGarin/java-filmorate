@@ -85,11 +85,22 @@ public class FilmService {
         return filmStorage.getRecommendations(userId);
     }
 
-    public List<Film> getFilmsSortedByDirector(Integer directorId,String sortBy) {
-        return filmStorage.getFilmsSortedByDirector(directorId,sortBy);
+    public List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy) {
+        return filmStorage.getFilmsSortedByDirector(directorId, sortBy);
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> searchFilms(String query, List<String> by) {
+        query = "%" + query + "%";
+        if ((by.size() == 2) && (by.contains("director")) && (by.contains("title"))) {
+            return filmStorage.searchFilmByNameAndDirector(query);
+        } else if ((by.size() == 1) && by.contains("director")) {
+            return filmStorage.searchFilmByDirector(query);
+        } else if ((by.size() == 1) && by.contains("title")) {
+            return filmStorage.searchFilmByTitle(query);
+        } else throw new IllegalArgumentException("Введены некорректные параметры");
     }
 }
