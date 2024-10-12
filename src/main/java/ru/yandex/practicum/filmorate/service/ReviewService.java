@@ -3,10 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.*;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.ReviewLikesRepository;
+import ru.yandex.practicum.filmorate.dal.ReviewRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.dal.ReviewRepository;
 
 import java.util.List;
 

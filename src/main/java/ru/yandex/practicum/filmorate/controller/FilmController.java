@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -78,6 +78,11 @@ public class FilmController {
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam("query") String query, @RequestParam("by") List<String> by) {
+        return filmService.searchFilms(query, by);
     }
 
 }

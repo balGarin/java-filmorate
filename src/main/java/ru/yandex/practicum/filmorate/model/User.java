@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentLoginParameters;
 
