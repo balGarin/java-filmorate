@@ -233,13 +233,13 @@ public class FilmRepository implements FilmStorage {
     private static final String DELETE_FILM_BY_ID = "DELETE FROM FILMS " +
             "WHERE FILM_ID=?";
 
-    private static final String GET_RECOMMENDATIONS = GET_ALL_FILMS_WITH_ALL_FIELDS +
+    private static final String GET_RECOMMENDATIONS = GET_FILMS_SUPER+
             "WHERE f.FILM_ID IN (" +
             /* Поиск фильмов которые лайкнули другие пользователи, но не лайкнул пользователь */
             "SELECT FILM_ID FROM LIKES " +
             "WHERE USER_ID IN " +
             "(" +
-            /* Поиск максимального совпадений по лайкам пользователя с другими пользователями */
+            /* Поиск максимального совпадения по лайкам пользователя с другими пользователями */
             "SELECT likes.USER_ID FROM LIKES likes " +
             "RIGHT JOIN LIKES likesUser ON likesUser.FiLM_ID = likes.FiLM_ID " +
             "GROUP BY likes.USER_ID, likesUser.USER_ID " +
@@ -255,7 +255,9 @@ public class FilmRepository implements FilmStorage {
             "SELECT FILM_ID FROM LIKES " +
             "WHERE USER_ID = ? " +
             ") " +
-            ")";
+            ")"+
+            "GROUP BY F.FILM_ID";
+
 
     private static final String DELETE_CONNECTION_DIRECTORS_FILMS = "DELETE FROM DIRECTORS_FILMS " +
             "WHERE FILM_ID = ?";
@@ -490,7 +492,7 @@ public class FilmRepository implements FilmStorage {
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
         List<Film> films = jdbc.query(GET_POPULAR, filmSuperMapper, count);
-        return fellFilms(films);
+        return films;
 
     }
 
@@ -504,20 +506,17 @@ public class FilmRepository implements FilmStorage {
      */
     @Override
     public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
-        List<Film> films = jdbc.query(GET_POPULAR_FILMS_ON_GENRE_AND_YEAR, filmSuperMapper, year, genreId, count);
-        return films;
+       return jdbc.query(GET_POPULAR_FILMS_ON_GENRE_AND_YEAR, filmSuperMapper, year, genreId, count);
     }
 
     @Override
     public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
-        List<Film> films = jdbc.query(GET_POPULAR_FILM_ON_GENRES, filmSuperMapper, genreId, count);
-        return films;
+       return jdbc.query(GET_POPULAR_FILM_ON_GENRES, filmSuperMapper, genreId, count);
     }
 
     @Override
     public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
-        List<Film> films = jdbc.query(GET_POPULAR_FILM_ON_YEAR, filmSuperMapper, year, count);
-        return fellFilms(films);
+        return jdbc.query(GET_POPULAR_FILM_ON_YEAR, filmSuperMapper, year, count);
     }
 
     private void insertForTwoKeys(String query, Object... params) {
@@ -609,7 +608,7 @@ public class FilmRepository implements FilmStorage {
      */
     @Override
     public List<Film> getRecommendations(Long userId) {
-        List<Film> films = jdbc.query(GET_RECOMMENDATIONS, filmFullRowMapper, userId, userId, userId);
+        List<Film> films = jdbc.query(GET_RECOMMENDATIONS, filmSuperMapper, userId, userId, userId);
         return films;
     }
 
