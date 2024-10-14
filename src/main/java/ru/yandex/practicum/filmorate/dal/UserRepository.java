@@ -88,7 +88,8 @@ public class UserRepository implements UserStorage {
         jdbc.update(UPDATE_USER, newUser.getEmail(), newUser.getLogin(), newUser.getName(), newUser.getBirthday(),
                 user.getId());
         user = getById(newUser.getId());
-        List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, user.getId());
+//        List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, user.getId());
+        List<Integer>friends = jdbc.queryForList(GET_FRIENDS,Integer.class,user.getId());
         user.setFriends(new HashSet<>(friends));
         return user;
     }
@@ -108,7 +109,8 @@ public class UserRepository implements UserStorage {
     public User getById(Integer id) {
         try {
             User user = jdbc.queryForObject(FIND_USER_BY_ID, userRowMapper, id);
-            List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, id);
+//            List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, id);
+            List<Integer>friends = jdbc.queryForList(GET_FRIENDS,Integer.class,id);
             user.setFriends(new HashSet<>(friends));
             if (user.getName() == null) {
                 user.setName(user.getLogin());
@@ -189,8 +191,6 @@ public class UserRepository implements UserStorage {
 
     private Integer insert(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -200,10 +200,7 @@ public class UserRepository implements UserStorage {
                 }
                 return ps;
             }, keyHolder);
-
             Integer id = keyHolder.getKeyAs(Integer.class);
-
-
             if (id != null) {
                 return id;
             } else {
@@ -216,8 +213,6 @@ public class UserRepository implements UserStorage {
 
     private void insertForTwoKeys(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -233,7 +228,8 @@ public class UserRepository implements UserStorage {
     }
 
     private boolean checkFriendship(Integer userId, Integer friendId) {
-        List<Integer> friendsOfUser = jdbc.query(GET_FRIENDS, friendRowMapper, userId);
+//        List<Integer> friendsOfUser = jdbc.query(GET_FRIENDS, friendRowMapper, userId);
+        List<Integer>friendsOfUser = jdbc.queryForList(GET_FRIENDS,Integer.class,userId);
         return friendsOfUser.stream()
                 .anyMatch(id -> id.equals(friendId));
     }

@@ -34,6 +34,7 @@ public class FilmRepository implements FilmStorage {
     private final DirectorRowMapper directorRowMapper;
     private final FilmRowMapperWithDir filmRowMapperWithDir;
     private final FilmRowMapperCommon filmRowMapperCommon;
+    private  final  FilmSuperMapper filmSuperMapper;
 
     private static final String ADD_FILM = "INSERT INTO FILMS (FILM_NAME,DESCRIPTION,RELEASEDATE,DURATION,RATING_ID)" +
             "VALUES(?,?,?,?,?)";
@@ -160,25 +161,68 @@ public class FilmRepository implements FilmStorage {
     private static final String DELETE_CONNECTION_DIRECTORS_FILMS = "DELETE FROM DIRECTORS_FILMS " +
             "WHERE FILM_ID = ?";
 
-    private static final String FIND_FILMS_BY_DIRECTOR_SORTED_BY_YEAR = "SELECT f.FILM_ID,f.FILM_NAME," +
-            "f.DESCRIPTION,f.RELEASEDATE,f.DURATION ,r.RATING_ID ,r.RATING_NAME ," +
-            "d.DIRECTOR_ID,d.DIRECTOR_NAME FROM FILMS f " +
-            "JOIN RATINGS r ON r.RATING_ID =f.RATING_ID " +
-            " JOIN DIRECTORS_FILMS df ON f.FILM_ID =DF.FILM_ID " +
-            " JOIN DIRECTORS d ON d.DIRECTOR_ID =df.DIRECTOR_ID " +
-            " WHERE d.DIRECTOR_ID = ? " +
-            " ORDER BY f.RELEASEDATE ASC ";
+   private static final String FIND_FILMS_BY_DIRECTOR_SORTED_BY_YEAR = """
+           SELECT F.FILM_ID,
+                   F.FILM_NAME,
+                   F.DESCRIPTION,
+                   F.RELEASEDATE,
+                   F.DURATION,
+                   F.RATING_ID,
+                   R.RATING_NAME,
+                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
+                   LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
+            FROM FILMS F
+            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+             JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
+             JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID
+             WHERE D.DIRECTOR_ID = ?
+             GROUP  BY F.FILM_ID
+             ORDER BY f.RELEASEDATE ASC""";
+//    "SELECT f.FILM_ID,f.FILM_NAME," +
+//            "f.DESCRIPTION,f.RELEASEDATE,f.DURATION ,r.RATING_ID ,r.RATING_NAME ," +
+//            "d.DIRECTOR_ID,d.DIRECTOR_NAME FROM FILMS f " +
+//            "JOIN RATINGS r ON r.RATING_ID =f.RATING_ID " +
+//            " JOIN DIRECTORS_FILMS df ON f.FILM_ID =DF.FILM_ID " +
+//            " JOIN DIRECTORS d ON d.DIRECTOR_ID =df.DIRECTOR_ID " +
+//            " WHERE d.DIRECTOR_ID = ? " +
+//            " ORDER BY f.RELEASEDATE ASC ";
 
-    private static final String FIND_FILMS_BY_DIRECTOR_SORTED_BY_LIKES = "SELECT f.FILM_ID,f.FILM_NAME," +
-            "f.DESCRIPTION,f.RELEASEDATE,f.DURATION ,r.RATING_ID ,r.RATING_NAME ," +
-            "d.DIRECTOR_ID,d.DIRECTOR_NAME FROM FILMS f " +
-            "LEFT JOIN LIKES l ON f.FILM_ID =l.FILM_ID " +
-            "JOIN RATINGS r ON r.RATING_ID =f.RATING_ID " +
-            "JOIN DIRECTORS_FILMS df ON df.FILM_ID = f.FILM_ID " +
-            "JOIN DIRECTORS d ON d.DIRECTOR_ID = df.DIRECTOR_ID " +
-            "WHERE d.DIRECTOR_ID = ? " +
-            "GROUP  BY f.FILM_ID  " +
-            "ORDER BY COUNT(l.USER_ID) DESC ";
+    private static final String FIND_FILMS_BY_DIRECTOR_SORTED_BY_LIKES =
+//            "SELECT f.FILM_ID,f.FILM_NAME," +
+//            "f.DESCRIPTION,f.RELEASEDATE,f.DURATION ,r.RATING_ID ,r.RATING_NAME ," +
+//            "d.DIRECTOR_ID,d.DIRECTOR_NAME FROM FILMS f " +
+//            "LEFT JOIN LIKES l ON f.FILM_ID =l.FILM_ID " +
+//            "JOIN RATINGS r ON r.RATING_ID =f.RATING_ID " +
+//            "JOIN DIRECTORS_FILMS df ON df.FILM_ID = f.FILM_ID " +
+//            "JOIN DIRECTORS d ON d.DIRECTOR_ID = df.DIRECTOR_ID " +
+//            "WHERE d.DIRECTOR_ID = ? " +
+//            "GROUP  BY f.FILM_ID  " +
+//            "ORDER BY COUNT(l.USER_ID) DESC ";
+            """
+                SELECT F.FILM_ID,
+                   F.FILM_NAME,
+                   F.DESCRIPTION,
+                   F.RELEASEDATE,
+                   F.DURATION,
+                   F.RATING_ID,
+                   R.RATING_NAME,
+                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
+                   LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
+            FROM FILMS F
+            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+             JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
+             JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID
+                WHERE d.DIRECTOR_ID = ?
+                 GROUP  BY f.FILM_ID
+                 ORDER BY COUNT(FL.USER_ID) DESC""";
 
     private static final String FIND_COMMON_FILMS_SORTED_BY_LIKES = """
             SELECT F.FILM_ID,
@@ -225,6 +269,30 @@ public class FilmRepository implements FilmStorage {
             " WHERE (d.DIRECTOR_NAME LIKE ? OR  f.FILM_NAME LIKE ?) " +
             " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
 
+    private  static  final  String GET_FILMS_SUPER = """
+             SELECT F.FILM_ID,
+                   F.FILM_NAME,
+                   F.DESCRIPTION,
+                   F.RELEASEDATE,
+                   F.DURATION,
+                   F.RATING_ID,
+                   R.RATING_NAME,
+                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
+                   LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
+            FROM FILMS F
+            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+            LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
+            LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID
+            """;
+
+    private final String DELETE_CONNECTION_FILMS_GENRES= "DELETE FROM FILMS_GENRES WHERE FILM_ID = ?";
+
+
+
     @Override
     public Film addFilm(Film film) {
         if (film.getMpa() == null) {
@@ -241,12 +309,13 @@ public class FilmRepository implements FilmStorage {
         }
         Integer id = insert(ADD_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId());
-        film.setId(id);
+       film.setId(id);
         Set<Genre> genres = film.getGenres();
         Set<Director> directors = film.getDirectors();
         addGenres(id, genres);
         addDirectors(id, directors);
         return film;
+
 
     }
 
@@ -264,33 +333,38 @@ public class FilmRepository implements FilmStorage {
         Set<Director> directors = newFilm.getDirectors();
         jdbc.update(DELETE_CONNECTION_DIRECTORS_FILMS, newFilm.getId());
         addDirectors(newFilm.getId(), directors);
-        Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, newFilm.getId());
-        film.setDirectors(directors);
+        Set<Genre>genres = newFilm.getGenres();
+        jdbc.update(DELETE_CONNECTION_FILMS_GENRES,newFilm.getId());
+        addGenres(newFilm.getId(),genres);
+//        Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, newFilm.getId());
+//        film.setDirectors(directors);
+        Film film = jdbc.queryForObject(GET_FILMS_SUPER+" WHERE F.FILM_ID = ?",filmSuperMapper,newFilm.getId());
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = jdbc.query(FIND_ALL_FILMS, filmRowMapper);
-        return fellFilms(films);
+//        List<Film> films = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
+////        return fellFilms(films);
+        return  jdbc.query(GET_FILMS_SUPER+" GROUP BY F.FILM_ID",filmSuperMapper);
     }
 
     @Override
     public Film getFilmById(Integer id) {
-        MPA mpa = new MPA();
+//        MPA mpa = new MPA();
         try {
-            Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
-            if (film.getMpa() != null) {
-                mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
-            }
-            film.setMpa(mpa);
-            List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
-            List<Director> directors = jdbc.query(FIND_DIRECTORS_BY_FILM_ID, directorRowMapper, film.getId());
-            List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, film.getId());
-            film.setLikes(new HashSet<>(likes));
-            film.setGenres(new HashSet<>(genres));
-            film.setDirectors(new HashSet<>(directors));
-            return film;
+//            Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
+//            if (film.getMpa() != null) {
+//                mpa = jdbc.queryForObject(FIND_MPA_BY_ID, mpaRowMapper, film.getMpa().getId());
+//            }
+//            film.setMpa(mpa);
+//            List<Genre> genres = jdbc.query(FIND_GENRE_BY_FILM_ID, genreRowMapper, film.getId());
+//            List<Director> directors = jdbc.query(FIND_DIRECTORS_BY_FILM_ID, directorRowMapper, film.getId());
+//            List<Integer> likes = jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, film.getId());
+//            film.setLikes(new HashSet<>(likes));
+//            film.setGenres(new HashSet<>(genres));
+//            film.setDirectors(new HashSet<>(directors));
+            return jdbc.queryForObject(GET_FILMS_SUPER+" WHERE F.FILM_ID = ?",filmSuperMapper,id);
         } catch (DataAccessException e) {
             throw new NotFoundException("Фильм c ID " + id + " не найден");
         }
@@ -306,7 +380,7 @@ public class FilmRepository implements FilmStorage {
             throw new NotFoundException("Пользователя с " + userId + " ID не найден!");
         }
         try {
-            Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
+            Film film = jdbc.queryForObject(GET_FILMS_SUPER+" WHERE F.FILM_ID = ?", filmSuperMapper, id);
         } catch (DataAccessException e) {
             throw new NotFoundException("Фильм с " + id + " ID не найден!");
         }
@@ -322,7 +396,7 @@ public class FilmRepository implements FilmStorage {
             throw new NotFoundException("Пользователя с " + userId + " ID не найден!");
         }
         try {
-            Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, id);
+            Film film = jdbc.queryForObject(GET_FILMS_SUPER+" WHERE F.FILM_ID = ?", filmSuperMapper, id);
         } catch (DataAccessException e) {
             throw new NotFoundException("Фильм с " + id + " ID не найден!");
         }
@@ -367,8 +441,6 @@ public class FilmRepository implements FilmStorage {
 
     private void insertForTwoKeys(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -385,8 +457,6 @@ public class FilmRepository implements FilmStorage {
 
     private Integer insert(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -396,10 +466,7 @@ public class FilmRepository implements FilmStorage {
                 }
                 return ps;
             }, keyHolder);
-
             Integer id = keyHolder.getKeyAs(Integer.class);
-
-
             if (id != null) {
                 return id;
             } else {
@@ -428,7 +495,7 @@ public class FilmRepository implements FilmStorage {
     }
 
     public List<Integer> getLikes(Integer id) {
-        return jdbc.query(GET_LIST_OF_LIKES_BY_Id, likeRowMapper, id);
+        return jdbc.queryForList(GET_LIST_OF_LIKES_BY_Id, Integer.class, id);
     }
 
     private void addGenres(Integer id, Set<Genre> genres) {
@@ -482,9 +549,9 @@ public class FilmRepository implements FilmStorage {
     public List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy) {
         List<Film> films;
         if (sortBy.equals("year")) {
-            films = jdbc.query(FIND_FILMS_BY_DIRECTOR_SORTED_BY_YEAR, filmRowMapperWithDir, directorId);
+            films = jdbc.query(FIND_FILMS_BY_DIRECTOR_SORTED_BY_YEAR, filmSuperMapper, directorId);
         } else if (sortBy.equals("likes")) {
-            films = jdbc.query(FIND_FILMS_BY_DIRECTOR_SORTED_BY_LIKES, filmRowMapperWithDir, directorId);
+            films = jdbc.query(FIND_FILMS_BY_DIRECTOR_SORTED_BY_LIKES, filmSuperMapper, directorId);
         } else {
             throw new IncorrectDataException("Не верный запрос");
         }
