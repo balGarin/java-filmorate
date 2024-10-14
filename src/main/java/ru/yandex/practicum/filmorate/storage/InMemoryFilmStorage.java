@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 @Repository("InMemoryFilms")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private Map<Integer, Film> films = new HashMap<>();
-    private InMemoryUserStorage userStorage;
+    private final Map<Integer, Film> films = new HashMap<>();
+    private final InMemoryUserStorage userStorage;
 
     public InMemoryFilmStorage(InMemoryUserStorage userStorage) {
         this.userStorage = userStorage;
@@ -26,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         newFilm.setId(generateId());
         newFilm.setLikes(new HashSet<>());
         films.put(newFilm.getId(), newFilm);
-        log.info("Добавлен новый фильм {}", newFilm.toString());
+        log.info("Добавлен новый фильм {}", newFilm);
         return newFilm;
     }
 
@@ -54,7 +54,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (newFilm.getReleaseDate() != null) {
             film.setReleaseDate(newFilm.getReleaseDate());
         }
-        log.info("Фильм № {} успешно обновлен ", film.toString());
+        log.info("Фильм № {} успешно обновлен ", film);
         return film;
     }
 
@@ -168,6 +168,21 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchFilmByNameAndDirector(String query) {
         return null;
     }
 }

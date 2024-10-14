@@ -24,10 +24,10 @@ public class ReviewRepository {
     private static final String ADD_REVIEW = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL)" +
             "VALUES(?, ?, ?, ?, COALESCE(?, 0))";
     private static final String UPDATE_REVIEW = """
-        UPDATE REVIEWS
-        SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?, USEFUL = ?
-        WHERE REVIEW_ID = ?
-        """;
+            UPDATE REVIEWS
+            SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?, USEFUL = ?
+            WHERE REVIEW_ID = ?
+            """;
     private static final String DELETE_REVIEW = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
 
     private final JdbcTemplate jdbc;
