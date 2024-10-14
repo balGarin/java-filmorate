@@ -147,24 +147,7 @@ public class FilmRepository implements FilmStorage {
 //            "ORDER BY count(l.USER_ID) DESC " +
 //            "LIMIT ?) " +
 //            ")";
-            """
-                 SELECT F.FILM_ID,
-                          F.FILM_NAME,
-                          F.DESCRIPTION,
-                          F.RELEASEDATE,
-                          F.DURATION,
-                          F.RATING_ID,
-                          R.RATING_NAME,
-                          LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
-                          LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
-                          LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
-                   FROM FILMS F
-                   LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
-                    JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
-                    JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
-                   LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
-                   LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
-                   LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID 
+            GET_FILMS_SUPER +"""
                       WHERE G.GENRE_ID = ?
                       GROUP BY f.FILM_ID
                       ORDER BY count(Fl.USER_ID) DESC
@@ -191,6 +174,12 @@ public class FilmRepository implements FilmStorage {
                      LIMIT ?""";
 
     private static final String GET_POPULAR_FILMS_ON_GENRE_AND_YEAR =
+            GET_FILMS_SUPER + """
+                   WHERE EXTRACT(YEAR FROM CAST(F.RELEASEDATE AS date)) = ?
+                   AND G.GENRE_ID = ?
+                   GROUP BY f.FILM_ID
+                   ORDER BY count(Fl.USER_ID) DESC
+                   LIMIT ?""";
 //            GET_ALL_FILMS_WITH_ALL_FIELDS +
 //            "WHERE f.FILM_ID IN (" +
 //            "SELECT id FROM (" +
@@ -205,29 +194,25 @@ public class FilmRepository implements FilmStorage {
 //            "ORDER BY count(l.USER_ID) DESC " +
 //            "LIMIT ?) " +
 //            ")";
-            """
-                     SELECT F.FILM_ID,
-                          F.FILM_NAME,
-                          F.DESCRIPTION,
-                          F.RELEASEDATE,
-                          F.DURATION,
-                          F.RATING_ID,
-                          R.RATING_NAME,
-                          LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
-                          LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
-                          LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
-                   FROM FILMS F
-                   LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
-                    JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
-                    JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
-                   LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
-                   LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
-                   LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID 
-                   WHERE EXTRACT(YEAR FROM CAST(F.RELEASEDATE AS date)) = ?
-                   AND G.GENRE_ID = ?
-                   GROUP BY f.FILM_ID
-                   ORDER BY count(Fl.USER_ID) DESC
-                   LIMIT ?""";
+
+//                     SELECT F.FILM_ID,
+//                          F.FILM_NAME,
+//                          F.DESCRIPTION,
+//                          F.RELEASEDATE,
+//                          F.DURATION,
+//                          F.RATING_ID,
+//                          R.RATING_NAME,
+//                          LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+//                          LISTAGG(DISTINCT FL.USER_ID) AS LIKES,
+//                          LISTAGG(DISTINCT CONCAT(D.DIRECTOR_ID, '/', D.DIRECTOR_NAME)) FILTER (WHERE D.DIRECTOR_ID IS NOT NULL) AS DIRECTORS
+//                   FROM FILMS F
+//                   LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+//                    JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+//                    JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+//                   LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+//                   LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
+//                   LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID
+
 
 
     private static final String DELETE_FILM_BY_ID = "DELETE FROM FILMS " +
@@ -325,50 +310,79 @@ public class FilmRepository implements FilmStorage {
                  GROUP  BY f.FILM_ID
                  ORDER BY COUNT(FL.USER_ID) DESC""";
 
-    private static final String FIND_COMMON_FILMS_SORTED_BY_LIKES = """
-            SELECT F.FILM_ID,
-                   F.FILM_NAME,
-                   F.DESCRIPTION,
-                   F.RELEASEDATE,
-                   F.DURATION,
-                   F.RATING_ID,
-                   R.RATING_NAME,
-                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
-                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES
-            FROM FILMS F
-            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
-            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
-            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
-            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
-            WHERE F.FILM_ID IN (
-                SELECT FILM_ID,
-                FROM LIKES l
-                WHERE USER_ID = ? OR USER_ID = ?
-                GROUP BY FILM_ID
-                HAVING COUNT(*) = 2
-            )
-            GROUP BY F.FILM_ID,
-                     F.FILM_NAME,
-                     F.DESCRIPTION,
-                     F.RELEASEDATE,
-                     F.DURATION,
-                     F.RATING_ID,
-                     R.RATING_NAME
-            ORDER BY COUNT(DISTINCT FL.USER_ID) DESC
-            """;
+    private static final String FIND_COMMON_FILMS_SORTED_BY_LIKES =
+//            """
+//            SELECT F.FILM_ID,
+//                   F.FILM_NAME,
+//                   F.DESCRIPTION,
+//                   F.RELEASEDATE,
+//                   F.DURATION,
+//                   F.RATING_ID,
+//                   R.RATING_NAME,
+//                   LISTAGG(DISTINCT CONCAT(G.GENRE_ID, '/', G.GENRE_NAME)) FILTER (WHERE G.GENRE_ID IS NOT NULL) AS GENRES,
+//                   LISTAGG(DISTINCT FL.USER_ID) AS LIKES
+//            FROM FILMS F
+//            LEFT JOIN RATINGS R ON F.RATING_ID = R.RATING_ID
+//            LEFT JOIN FILMS_GENRES FG ON F.FILM_ID = FG.FILM_ID
+//            LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
+//            LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
+//            WHERE F.FILM_ID IN (
+//                SELECT FILM_ID,
+//                FROM LIKES l
+//                WHERE USER_ID = ? OR USER_ID = ?
+//                GROUP BY FILM_ID
+//                HAVING COUNT(*) = 2
+//            )
+//            GROUP BY F.FILM_ID,
+//                     F.FILM_NAME,
+//                     F.DESCRIPTION,
+//                     F.RELEASEDATE,
+//                     F.DURATION,
+//                     F.RATING_ID,
+//                     R.RATING_NAME
+//            ORDER BY COUNT(DISTINCT FL.USER_ID) DESC
+//            """;
+    GET_FILMS_SUPER + """
+              WHERE F.FILM_ID IN (
+                            SELECT FILM_ID,
+                            FROM LIKES l
+                            WHERE USER_ID = ? OR USER_ID = ?
+                            GROUP BY FILM_ID
+                            HAVING COUNT(*) = 2
+                        )
+                        GROUP BY F.FILM_ID,
+                                 F.FILM_NAME,
+                                 F.DESCRIPTION,
+                                 F.RELEASEDATE,
+                                 F.DURATION,
+                                 F.RATING_ID,
+                                 R.RATING_NAME
+                        ORDER BY COUNT(DISTINCT FL.USER_ID) DESC""";
 
-    private static final String SEARCH_FILM_BY_TITLE = GET_ALL_FILMS_WITH_ALL_FIELDS +
-            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
-            " WHERE f.FILM_NAME LIKE ? " +
-            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
-    private static final String SEARCH_FILM_BY_DIRECTOR = GET_ALL_FILMS_WITH_ALL_FIELDS +
-            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
-            " WHERE d.DIRECTOR_NAME LIKE ? " +
-            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
-    private static final String SEARCH_FILM_BY_DIRECTOR_AND_TITLE = GET_ALL_FILMS_WITH_ALL_FIELDS +
-            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
-            " WHERE (d.DIRECTOR_NAME LIKE ? OR  f.FILM_NAME LIKE ?) " +
-            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
+    private static final String SEARCH_FILM_BY_TITLE =
+//            GET_ALL_FILMS_WITH_ALL_FIELDS +
+//            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+//            " WHERE f.FILM_NAME LIKE ? " +
+//            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
+    GET_FILMS_SUPER + """
+            WHERE F.FILM_NAME LIKE ?
+            GROUP BY f.FILM_ID ORDER BY COUNT( Fl.FILM_ID ) DESC""";
+    private static final String SEARCH_FILM_BY_DIRECTOR =
+//            GET_ALL_FILMS_WITH_ALL_FIELDS +
+//            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+//            " WHERE d.DIRECTOR_NAME LIKE ? " +
+//            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
+    GET_FILMS_SUPER + """
+            WHERE D.DIRECTOR_NAME LIKE ?
+            GROUP BY f.FILM_ID ORDER BY COUNT( Fl.FILM_ID ) DESC""";
+    private static final String SEARCH_FILM_BY_DIRECTOR_AND_TITLE =
+//            GET_ALL_FILMS_WITH_ALL_FIELDS +
+//            " LEFT JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+//            " WHERE (d.DIRECTOR_NAME LIKE ? OR  f.FILM_NAME LIKE ?) " +
+//            " GROUP BY f.FILM_ID ORDER BY COUNT( l.FILM_ID ) desc";
+    GET_FILMS_SUPER + """
+            WHERE (d.DIRECTOR_NAME LIKE ? OR  f.FILM_NAME LIKE ?)
+            GROUP BY f.FILM_ID ORDER BY COUNT( Fl.FILM_ID ) desc""";
 
 
 
@@ -641,26 +655,26 @@ public class FilmRepository implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         List<Film> films;
-        films = jdbc.query(FIND_COMMON_FILMS_SORTED_BY_LIKES, filmRowMapperCommon, userId, friendId);
+        films = jdbc.query(FIND_COMMON_FILMS_SORTED_BY_LIKES, filmSuperMapper, userId, friendId);
         return films;
     }
 
     @Override
     public List<Film> searchFilmByDirector(String query) {
-        List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR, filmFullRowMapper, query);
+        List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR, filmSuperMapper, query);
         return films;
     }
 
     @Override
     public List<Film> searchFilmByTitle(String query) {
-        List<Film> films = jdbc.query(SEARCH_FILM_BY_TITLE, filmFullRowMapper, query);
+        List<Film> films = jdbc.query(SEARCH_FILM_BY_TITLE, filmSuperMapper, query);
         return films;
     }
 
     @Override
     public List<Film> searchFilmByNameAndDirector(String query) {
         try {
-            List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR_AND_TITLE, filmFullRowMapper, query, query);
+            List<Film> films = jdbc.query(SEARCH_FILM_BY_DIRECTOR_AND_TITLE, filmSuperMapper, query, query);
             return films;
         } catch (Exception e) {
             return new ArrayList<>();
