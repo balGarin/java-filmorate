@@ -5,7 +5,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.mappers.FriendRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.StatusRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
@@ -24,9 +23,7 @@ import java.util.List;
 @Repository("DBUsers")
 public class UserRepository implements UserStorage {
     private final JdbcTemplate jdbc;
-
     private final UserRowMapper userRowMapper;
-    private final FriendRowMapper friendRowMapper;
     private final StatusRowMapper statusRowMapper;
 
     private static final String ADD_USER = "INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY)" +
@@ -88,8 +85,7 @@ public class UserRepository implements UserStorage {
         jdbc.update(UPDATE_USER, newUser.getEmail(), newUser.getLogin(), newUser.getName(), newUser.getBirthday(),
                 user.getId());
         user = getById(newUser.getId());
-//        List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, user.getId());
-        List<Integer>friends = jdbc.queryForList(GET_FRIENDS,Integer.class,user.getId());
+        List<Integer> friends = jdbc.queryForList(GET_FRIENDS, Integer.class, user.getId());
         user.setFriends(new HashSet<>(friends));
         return user;
     }
@@ -109,8 +105,7 @@ public class UserRepository implements UserStorage {
     public User getById(Integer id) {
         try {
             User user = jdbc.queryForObject(FIND_USER_BY_ID, userRowMapper, id);
-//            List<Integer> friends = jdbc.query(GET_FRIENDS, friendRowMapper, id);
-            List<Integer>friends = jdbc.queryForList(GET_FRIENDS,Integer.class,id);
+            List<Integer> friends = jdbc.queryForList(GET_FRIENDS, Integer.class, id);
             user.setFriends(new HashSet<>(friends));
             if (user.getName() == null) {
                 user.setName(user.getLogin());
@@ -228,8 +223,7 @@ public class UserRepository implements UserStorage {
     }
 
     private boolean checkFriendship(Integer userId, Integer friendId) {
-//        List<Integer> friendsOfUser = jdbc.query(GET_FRIENDS, friendRowMapper, userId);
-        List<Integer>friendsOfUser = jdbc.queryForList(GET_FRIENDS,Integer.class,userId);
+        List<Integer> friendsOfUser = jdbc.queryForList(GET_FRIENDS, Integer.class, userId);
         return friendsOfUser.stream()
                 .anyMatch(id -> id.equals(friendId));
     }

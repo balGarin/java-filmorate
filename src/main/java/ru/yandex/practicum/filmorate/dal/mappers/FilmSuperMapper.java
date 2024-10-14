@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 @Component
 public class FilmSuperMapper implements RowMapper<Film> {
     @Override
@@ -39,20 +40,20 @@ public class FilmSuperMapper implements RowMapper<Film> {
                 genreHashSet.add(g);
             }
             film.setGenres(genreHashSet);
-        }else {
+        } else {
             film.setGenres(new HashSet<>());
         }
         String likes = resultSet.getString("LIKES");
         if (likes != null) {
             film.setLikes(Arrays.stream(likes.split(",")).map(s -> Integer.parseInt(s)).collect(Collectors.toSet()));
-        }else {
+        } else {
             film.setLikes(new HashSet<>());
         }
         String directors = resultSet.getString("DIRECTORS");
-        Set<Director>directorsSet = new HashSet<>();
-        if(directors!=null){
-            String[]splitDir = directors.split(",");
-            for(String strDir : splitDir){
+        Set<Director> directorsSet = new HashSet<>();
+        if (directors != null) {
+            String[] splitDir = directors.split(",");
+            for (String strDir : splitDir) {
                 String[] dirRow = strDir.split("/");
                 Director director = new Director();
                 director.setId(Integer.parseInt(dirRow[0]));
@@ -60,7 +61,7 @@ public class FilmSuperMapper implements RowMapper<Film> {
                 directorsSet.add(director);
             }
             film.setDirectors(directorsSet);
-         }else {
+        } else {
             film.setDirectors(new HashSet<>());
         }
         return film;
