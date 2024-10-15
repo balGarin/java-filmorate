@@ -20,6 +20,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+
     public User addUser(User user) {
         return userStorage.addUser(user);
     }

@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dal.EventRepository;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final FilmService filmService;
+    private final EventRepository eventRepository;
 
 
     @PostMapping
@@ -75,4 +78,10 @@ public class UserController {
     public void deleteUserByID(@PathVariable Integer id) {
         userService.deleteUserById(id);
     }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getListOfEvents(@PathVariable Integer id) {
+        return eventRepository.getEventByUserId(id);
+    }
 }
+

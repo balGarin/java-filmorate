@@ -11,11 +11,15 @@ import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.OperationType;
+import ru.yandex.practicum.filmorate.model.TypeOfEvent;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 
@@ -25,6 +29,7 @@ public class UserRepository implements UserStorage {
     private final JdbcTemplate jdbc;
     private final UserRowMapper userRowMapper;
     private final StatusRowMapper statusRowMapper;
+    private final EventRepository eventRepository;
 
     private static final String ADD_USER = "INSERT INTO USERS (EMAIL, LOGIN, USER_NAME, BIRTHDAY)" +
             "VALUES(?, ?, ?, ?)";
@@ -136,8 +141,14 @@ public class UserRepository implements UserStorage {
             insertForTwoKeys(ADD_FRIEND, id, friendId, 1);
         } else {
             insertForTwoKeys(ADD_FRIEND, id, friendId, 2);
-
         }
+        eventRepository.addEvent(Event.builder()
+                .userId(id)
+                .eventType(TypeOfEvent.FRIEND)
+                .operation(OperationType.ADD)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(friendId)
+                .build());
     }
 
     @Override
@@ -158,6 +169,13 @@ public class UserRepository implements UserStorage {
                 jdbc.update(UPDATE_STATUS, 2, friendId, id);
             }
             jdbc.update(DELETE_FRIEND, id, friendId);
+            eventRepository.addEvent(Event.builder()
+                    .userId(id)
+                    .eventType(TypeOfEvent.FRIEND)
+                    .operation(OperationType.REMOVE)
+                    .timestamp(Instant.now().toEpochMilli())
+                    .entityId(friendId)
+                    .build());
         }
     }
 
