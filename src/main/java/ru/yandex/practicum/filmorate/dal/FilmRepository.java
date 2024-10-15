@@ -6,7 +6,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.mappers.*;
+import ru.yandex.practicum.filmorate.dal.mappers.FilmSuperMapper;
+import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +31,7 @@ public class FilmRepository implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final UserRowMapper userRowMapper;
     private final FilmSuperMapper filmSuperMapper;
+    private final EventRepository eventRepository;
 
     private static final String ADD_FILM = "INSERT INTO FILMS (FILM_NAME,DESCRIPTION,RELEASEDATE,DURATION,RATING_ID)" +
             "VALUES(?,?,?,?,?)";
@@ -50,7 +53,7 @@ public class FilmRepository implements FilmStorage {
             LEFT JOIN GENRES G ON FG.GENRE_ID = G.GENRE_ID
             LEFT JOIN LIKES FL ON F.FILM_ID = FL.FILM_ID
             LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
-            LEFT JOIN DIRECTORS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID
+            LEFT JOIN DIRECTORS D ON DF.DIRECTOR_ID = D.DIRECTOR_ID
             """;
     private static final String UPDATE_FILM = "UPDATE FILMS SET  FILM_NAME = ? , DESCRIPTION = ?," +
             "DURATION = ?, RELEASEDATE = ?" +
@@ -263,8 +266,6 @@ public class FilmRepository implements FilmStorage {
         } catch (DataAccessException e) {
             throw new NotFoundException("Фильм c ID " + id + " не найден");
         }
-
-
     }
 
     @Override
@@ -279,8 +280,14 @@ public class FilmRepository implements FilmStorage {
         } catch (DataAccessException e) {
             throw new NotFoundException("Фильм с " + id + " ID не найден!");
         }
-
         insertForTwoKeys(ADD_LIKE, id, userId);
+        eventRepository.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(TypeOfEvent.LIKE)
+                .operation(OperationType.ADD)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(id)
+                .build());
     }
 
     @Override
@@ -299,13 +306,19 @@ public class FilmRepository implements FilmStorage {
         if (rowsDeleted == 0) {
             throw new NotFoundException(" Лайк не найден");
         }
+        eventRepository.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(TypeOfEvent.LIKE)
+                .operation(OperationType.REMOVE)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(id)
+                .build());
     }
 
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
         List<Film> films = jdbc.query(GET_POPULAR, filmSuperMapper, count);
         return films;
-
     }
 
     /**

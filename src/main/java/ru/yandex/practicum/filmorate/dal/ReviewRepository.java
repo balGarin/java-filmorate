@@ -10,15 +10,20 @@ import ru.yandex.practicum.filmorate.dal.mappers.ReviewRowMapper;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.OperationType;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.TypeOfEvent;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class ReviewRepository {
+    private final EventRepository eventRepository;
     private static final String FIND_ALL_REVIEW = "SELECT * FROM REVIEWS";
     private static final String FIND_REVIEW_BY_ID = "SELECT * FROM REVIEWS WHERE REVIEW_ID = ?";
     private static final String ADD_REVIEW = "INSERT INTO REVIEWS (CONTENT, IS_POSITIVE, USER_ID, FILM_ID, USEFUL)" +
@@ -50,6 +55,13 @@ public class ReviewRepository {
         Integer id = insert(ADD_REVIEW, newReview.getContent(), newReview.getIsPositive(), newReview.getUserId(),
                 newReview.getFilmId(), newReview.getUseful());
         newReview.setReviewId(id);
+        eventRepository.addEvent(Event.builder()
+                .userId(newReview.getUserId())
+                .eventType(TypeOfEvent.REVIEW)
+                .operation(OperationType.ADD)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(id)
+                .build());
         return newReview;
     }
 
@@ -58,16 +70,31 @@ public class ReviewRepository {
                 newReview.getFilmId(),
                 newReview.getUseful(),
                 newReview.getReviewId());
+        eventRepository.addEvent(Event.builder()
+                .userId(newReview.getUserId())
+                .eventType(TypeOfEvent.REVIEW)
+                .operation(OperationType.UPDATE)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(newReview.getReviewId())
+                .build());
         return newReview;
     }
 
     public void deleteReview(Integer id) {
+        Review reviewToDelete = getReviewById(id);
         try {
             getReviewById(id);
         } catch (DataAccessException e) {
             throw new NotFoundException("Ревью с ID = " + id + " не найдено");
         }
         jdbc.update(DELETE_REVIEW, id);
+        eventRepository.addEvent(Event.builder()
+                .userId(reviewToDelete.getUserId())
+                .eventType(TypeOfEvent.REVIEW)
+                .operation(OperationType.REMOVE)
+                .timestamp(Instant.now().toEpochMilli())
+                .entityId(id)
+                .build());
     }
 
 
