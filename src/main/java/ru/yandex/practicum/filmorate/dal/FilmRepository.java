@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 @AllArgsConstructor
 @Repository("DBFilms")
-@Slf4j
 public class FilmRepository implements FilmStorage {
 
     private final JdbcTemplate jdbc;
@@ -245,17 +243,12 @@ public class FilmRepository implements FilmStorage {
         Set<Genre> genres = newFilm.getGenres();
         jdbc.update(DELETE_CONNECTION_FILMS_GENRES, newFilm.getId());
         addGenres(newFilm.getId(), genres);
-//        Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, newFilm.getId());
-//        film.setDirectors(directors);
         Film film = jdbc.queryForObject(GET_FILMS_SUPER + " WHERE F.FILM_ID = ?", filmSuperMapper, newFilm.getId());
-        log.warn(film.toString());
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-//        List<Film> films = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
-////        return fellFilms(films);
         return jdbc.query(GET_FILMS_SUPER + " GROUP BY F.FILM_ID", filmSuperMapper);
     }
 
