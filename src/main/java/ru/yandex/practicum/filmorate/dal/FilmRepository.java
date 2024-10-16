@@ -55,8 +55,10 @@ public class FilmRepository implements FilmStorage {
             LEFT JOIN DIRECTORS_FILMS DF ON DF.FILM_ID = F.FILM_ID
             LEFT JOIN DIRECTORS D ON DF.DIRECTOR_ID = D.DIRECTOR_ID
             """;
+
+    // Добавил рейтинг для теста Film update
     private static final String UPDATE_FILM = "UPDATE FILMS SET  FILM_NAME = ? , DESCRIPTION = ?," +
-            "DURATION = ?, RELEASEDATE = ?" +
+            "DURATION = ?, RELEASEDATE = ?, RATING_ID = ? " +
             "WHERE FILM_ID = ?";
     private static final String ADD_LIKE = "INSERT INTO LIKES (FILM_ID,USER_ID)" +
             "VALUES (?,?)";
@@ -234,8 +236,9 @@ public class FilmRepository implements FilmStorage {
         if (newFilm.getId() == null) {
             throw new IncorrectDataException("Поле ID обязательно для этой операции");
         }
+        // Добавил рейтинг для теста Film update
         int rowChanged = jdbc.update(UPDATE_FILM, newFilm.getName(), newFilm.getDescription(), newFilm.getDuration(),
-                newFilm.getReleaseDate(), newFilm.getId());
+                newFilm.getReleaseDate(), newFilm.getMpa().getId(), newFilm.getId());
         if (rowChanged == 0) {
             throw new NotFoundException("Не удалось обновить данные");
         }
@@ -245,8 +248,6 @@ public class FilmRepository implements FilmStorage {
         Set<Genre> genres = newFilm.getGenres();
         jdbc.update(DELETE_CONNECTION_FILMS_GENRES, newFilm.getId());
         addGenres(newFilm.getId(), genres);
-//        Film film = jdbc.queryForObject(FIND_FILM_BY_ID, filmRowMapper, newFilm.getId());
-//        film.setDirectors(directors);
         Film film = jdbc.queryForObject(GET_FILMS_SUPER + " WHERE F.FILM_ID = ?", filmSuperMapper, newFilm.getId());
         log.warn(film.toString());
         return film;
@@ -254,18 +255,17 @@ public class FilmRepository implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-//        List<Film> films = jdbc.query(GET_ALL_FILMS_WITH_ALL_FIELDS, filmFullRowMapper);
-////        return fellFilms(films);
         return jdbc.query(GET_FILMS_SUPER + " GROUP BY F.FILM_ID", filmSuperMapper);
     }
 
     @Override
     public Film getFilmById(Integer id) {
-        try {
-            return jdbc.queryForObject(GET_FILMS_SUPER + " WHERE F.FILM_ID = ?", filmSuperMapper, id);
-        } catch (DataAccessException e) {
-            throw new NotFoundException("Фильм c ID " + id + " не найден");
+        // Добавил проверку FILM_ID для теста Film id=9999 get not found
+        String sql = "SELECT EXISTS(SELECT 1 FROM films WHERE film_id = ?);";
+        if (Boolean.FALSE.equals(jdbc.queryForObject(sql, Boolean.class, id))) {
+            throw new NotFoundException("Должен быть указан существующий id");
         }
+            return jdbc.queryForObject(GET_FILMS_SUPER + " WHERE F.FILM_ID = ?", filmSuperMapper, id);
     }
 
     @Override
@@ -435,6 +435,11 @@ public class FilmRepository implements FilmStorage {
 
     @Override
     public List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy) {
+        // Добавил проверку DIRECTOR_ID для теста Get films with deleted director
+        String sql = "SELECT EXISTS(SELECT 1 FROM DIRECTORS WHERE DIRECTOR_ID = ?);";
+        if (Boolean.FALSE.equals(jdbc.queryForObject(sql, Boolean.class, directorId))) {
+            throw new NotFoundException("Должен быть указан существующий id");
+        }
         List<Film> films;
         if (sortBy.equals("year")) {
             films = jdbc.query(FIND_FILMS_BY_DIRECTOR_SORTED_BY_YEAR, filmSuperMapper, directorId);

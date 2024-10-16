@@ -5,6 +5,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import ru.yandex.practicum.filmorate.dal.mappers.StatusRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.IncorrectDataException;
@@ -70,7 +71,8 @@ public class UserRepository implements UserStorage {
 
     @Override
     public User addUser(User newUser) {
-        if (newUser.getName() == null) {
+        /* Изменил проверку имени пользователя для теста Common Friend Create */
+        if (!StringUtils.hasText(newUser.getName())) {
             newUser.setName(newUser.getLogin());
         }
         Integer id = insert(ADD_USER, newUser.getEmail(), newUser.getLogin(), newUser.getName(), newUser.getBirthday());
