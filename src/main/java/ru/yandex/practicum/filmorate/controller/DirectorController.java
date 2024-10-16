@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dal.DirectorRepository;
@@ -25,8 +26,9 @@ public class DirectorController {
         return directorRepository.getDirectorById(id);
     }
 
+    // Добавил валидацию для поля name тест Create director Fail name
     @PostMapping
-    public Director addDirector(@RequestBody Director newDirector) {
+    public Director addDirector(@Valid @RequestBody Director newDirector) {
         return directorRepository.addDirector(newDirector);
     }
 
