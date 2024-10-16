@@ -31,8 +31,10 @@ public class ReviewService {
             throw new IncorrectDataException("ID обязателен для этой операции");
         }
 
+        /*
         userRepository.getById(newReview.getUserId());
         filmRepository.getFilmById(newReview.getFilmId());
+         */
 
         Review review = getReviewById(newReview.getReviewId());
 
@@ -42,7 +44,7 @@ public class ReviewService {
         if (newReview.getIsPositive() != null) {
             review.setIsPositive((newReview.getIsPositive()));
         }
-
+/*
         if (newReview.getUserId() != null) {
             review.setUserId(newReview.getUserId());
         }
@@ -54,6 +56,8 @@ public class ReviewService {
         if (newReview.getUseful() != null) {
             review.setUseful(newReview.getUseful());
         }
+
+ */
 
         return repository.updateReview(review);
     }

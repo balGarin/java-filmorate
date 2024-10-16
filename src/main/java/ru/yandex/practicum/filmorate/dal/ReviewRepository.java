@@ -129,6 +129,7 @@ public class ReviewRepository {
         if (filmId != null) {
             query = query + " WHERE FILM_ID = " + filmId;
         }
+        query = query + " ORDER BY USEFUL DESC ";
         query = query + " LIMIT " + count;
 
         return jdbc.query(query, mapper);
