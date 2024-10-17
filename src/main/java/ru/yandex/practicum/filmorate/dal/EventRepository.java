@@ -6,13 +6,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.EventRowMapper;
+import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -24,23 +25,27 @@ public class EventRepository {
 
     private final JdbcTemplate jdbc;
     private final EventRowMapper mapper;
+    private final UserRowMapper userRowMapper;
 
     public List<Event> getEventByUserId(Integer userId) {
+        String query = "SELECT * FROM USERS WHERE USER_ID = ?";
         try {
+            jdbc.queryForObject(query, userRowMapper, userId);
             return jdbc.query(GET_EVENTS_BY_USERID, mapper, userId);
-        } catch (Exception e) {
-            return new ArrayList<>();
+
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Такого пользователя не существует");
         }
     }
 
     public Event addEvent(Event newEvent) {
-       Integer id = insert(ADD_EVENT,
+        Integer id = insert(ADD_EVENT,
                 newEvent.getUserId(),
                 newEvent.getEntityId(),
                 newEvent.getTimestamp(),
                 newEvent.getEventType().name(),
                 newEvent.getOperation().name());
-        newEvent.setId(id);
+        newEvent.setEventId(id);
         return newEvent;
     }
 

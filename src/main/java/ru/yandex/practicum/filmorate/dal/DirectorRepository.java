@@ -76,11 +76,8 @@ public class DirectorRepository {
         }
     }
 
-
     private Integer insert(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -90,10 +87,7 @@ public class DirectorRepository {
                 }
                 return ps;
             }, keyHolder);
-
             Integer id = keyHolder.getKeyAs(Integer.class);
-
-
             if (id != null) {
                 return id;
             } else {
@@ -103,5 +97,4 @@ public class DirectorRepository {
             throw new ValidationException(e.getMessage());
         }
     }
-
 }

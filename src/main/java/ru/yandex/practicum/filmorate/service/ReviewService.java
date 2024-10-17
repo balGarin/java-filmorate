@@ -30,31 +30,24 @@ public class ReviewService {
         if (newReview.getReviewId() == null) {
             throw new IncorrectDataException("ID обязателен для этой операции");
         }
-
         userRepository.getById(newReview.getUserId());
         filmRepository.getFilmById(newReview.getFilmId());
-
         Review review = getReviewById(newReview.getReviewId());
-
         if (newReview.getContent() != null) {
             review.setContent(newReview.getContent());
         }
         if (newReview.getIsPositive() != null) {
             review.setIsPositive((newReview.getIsPositive()));
         }
-
         if (newReview.getUserId() != null) {
             review.setUserId(newReview.getUserId());
         }
-
         if (newReview.getFilmId() != null) {
             review.setFilmId(newReview.getFilmId());
         }
-
         if (newReview.getUseful() != null) {
             review.setUseful(newReview.getUseful());
         }
-
         return repository.updateReview(review);
     }
 
@@ -72,9 +65,11 @@ public class ReviewService {
 
     public Review setLike(Integer reviewId, Integer userId) {
         Review review = repository.getReviewById(reviewId);
+        System.out.println(review.getUseful());
         reviewLikesRepository.setLike(reviewId, userId);
         review.setUseful(reviewLikesRepository.getUsableByReviewId(reviewId));
-        repository.updateReview(review);
+        System.out.println(review.getUseful());
+        repository.innerUpdate(review);
         return review;
     }
 
@@ -82,7 +77,7 @@ public class ReviewService {
         Review review = repository.getReviewById(reviewId);
         reviewLikesRepository.setDislike(reviewId, userId);
         review.setUseful(reviewLikesRepository.getUsableByReviewId(reviewId));
-        repository.updateReview(review);
+        repository.innerUpdate(review);
         return review;
     }
 
@@ -90,7 +85,7 @@ public class ReviewService {
         Review review = repository.getReviewById(reviewId);
         reviewLikesRepository.deleteLike(reviewId, userId);
         review.setUseful(reviewLikesRepository.getUsableByReviewId(reviewId));
-        repository.updateReview(review);
+        repository.innerUpdate(review);
         return review;
     }
 
@@ -98,7 +93,7 @@ public class ReviewService {
         Review review = repository.getReviewById(reviewId);
         reviewLikesRepository.deleteDislike(reviewId, userId);
         review.setUseful(reviewLikesRepository.getUsableByReviewId(reviewId));
-        repository.updateReview(review);
+        repository.innerUpdate(review);
         return review;
     }
 }

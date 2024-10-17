@@ -22,14 +22,13 @@ public class ReviewController {
         return reviewService.addReview(review);
     }
 
-
     @GetMapping("/{id}")
     public Review getReviewByID(@PathVariable Integer id) {
         return reviewService.getReviewById(id);
     }
 
     @GetMapping
-    public List<Review> getReviewsByFilmId(@RequestParam(name = "filmId", required = true) Integer filmId,
+    public List<Review> getReviewsByFilmId(@RequestParam(name = "filmId", required = false, defaultValue = "") Integer filmId,
                                            @RequestParam(name = "count", required = false, defaultValue = "10") Integer count) {
         return reviewService.getReviewsByFilmId(filmId, count);
     }
@@ -53,7 +52,6 @@ public class ReviewController {
     public Review deleteDislike(@PathVariable("id") Integer reviewId, @PathVariable("userId") Integer userId) {
         return reviewService.deleteDislike(reviewId, userId);
     }
-
 
     @PutMapping
     public Review updateReview(@RequestBody @Valid Review review) {

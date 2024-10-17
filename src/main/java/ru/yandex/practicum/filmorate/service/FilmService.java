@@ -55,14 +55,6 @@ public class FilmService {
         filmStorage.deleteFilmById(id);
     }
 
-    /**
-     * Вывод самых популярных фильмов по жанру и году или отдельно год, и отдельно жанр.
-     *
-     * @param count   количество топ фильмов, 10 по умолчанию,
-     * @param genreId айди жанра, для фильтрации по жанру,
-     * @param year    год выходы фильма, для фильтрации по году,
-     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
-     */
     public List<Film> getMostPopular(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
         if (genreId.isEmpty() && year.isEmpty()) {
             return filmStorage.getMostPopularFilms(count);
@@ -75,12 +67,6 @@ public class FilmService {
         }
     }
 
-    /**
-     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
-     *
-     * @param userId полльзователя которму даются рекомендации
-     * @return возврщает список фильмов
-     */
     public List<Film> getRecommendations(Long userId) {
         return filmStorage.getRecommendations(userId);
     }
@@ -95,6 +81,7 @@ public class FilmService {
 
     public List<Film> searchFilms(String query, List<String> by) {
         query = "%" + query + "%";
+        query = query.toLowerCase();
         if ((by.size() == 2) && (by.contains("director")) && (by.contains("title"))) {
             return filmStorage.searchFilmByNameAndDirector(query);
         } else if ((by.size() == 1) && by.contains("director")) {

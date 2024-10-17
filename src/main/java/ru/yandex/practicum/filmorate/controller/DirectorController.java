@@ -26,7 +26,6 @@ public class DirectorController {
         return directorRepository.getDirectorById(id);
     }
 
-    // Добавил валидацию для поля name тест Create director Fail name
     @PostMapping
     public Director addDirector(@Valid @RequestBody Director newDirector) {
         return directorRepository.addDirector(newDirector);

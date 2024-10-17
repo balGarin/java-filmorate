@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class Event {
-    private Integer id;
+    private Integer eventId;
     private Integer userId;
     private Integer entityId;
     private Long timestamp;

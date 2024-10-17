@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewRepository {
     private final EventRepository eventRepository;
     private static final String FIND_ALL_REVIEW = "SELECT * FROM REVIEWS";
@@ -30,17 +32,17 @@ public class ReviewRepository {
             "VALUES(?, ?, ?, ?, COALESCE(?, 0))";
     private static final String UPDATE_REVIEW = """
             UPDATE REVIEWS
-            SET CONTENT = ?, IS_POSITIVE = ?, USER_ID = ?, FILM_ID = ?, USEFUL = ?
+            SET CONTENT = ?, IS_POSITIVE = ?
             WHERE REVIEW_ID = ?
             """;
     private static final String DELETE_REVIEW = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
-
+    private static final String UPDATE_USEFUL = "UPDATE REVIEWS SET USEFUL=?" +
+            "WHERE REVIEW_ID =?";
     private final JdbcTemplate jdbc;
     private final ReviewRowMapper mapper;
 
-
-    public List<Review> getAllReview() {
-        return jdbc.query(FIND_ALL_REVIEW, mapper);
+    public List<Review> getAllReview(Integer count) {
+        return jdbc.query(FIND_ALL_REVIEW + " LIMIT ?", mapper, count);
     }
 
     public Review getReviewById(Integer id) {
@@ -62,22 +64,28 @@ public class ReviewRepository {
                 .timestamp(Instant.now().toEpochMilli())
                 .entityId(id)
                 .build());
+        log.warn("{} оставил ревью на {}", newReview.getUserId(), newReview.getFilmId());
         return newReview;
     }
 
     public Review updateReview(Review newReview) {
-        jdbc.update(UPDATE_REVIEW, newReview.getContent(), newReview.getIsPositive(), newReview.getUserId(),
-                newReview.getFilmId(),
-                newReview.getUseful(),
+        Review review;
+        try {
+            review = jdbc.queryForObject(FIND_REVIEW_BY_ID, mapper, newReview.getReviewId());
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Ревью с таким ID не найден");
+        }
+        jdbc.update(UPDATE_REVIEW, newReview.getContent(), newReview.getIsPositive(),
                 newReview.getReviewId());
         eventRepository.addEvent(Event.builder()
-                .userId(newReview.getUserId())
+                .userId(review.getUserId())
                 .eventType(TypeOfEvent.REVIEW)
                 .operation(OperationType.UPDATE)
                 .timestamp(Instant.now().toEpochMilli())
-                .entityId(newReview.getReviewId())
+                .entityId(review.getReviewId())
                 .build());
-        return newReview;
+        log.warn("{} обновил ревью на {}", review.getUserId(), review.getFilmId());
+        return jdbc.queryForObject(FIND_REVIEW_BY_ID, mapper, newReview.getReviewId());
     }
 
     public void deleteReview(Integer id) {
@@ -95,13 +103,11 @@ public class ReviewRepository {
                 .timestamp(Instant.now().toEpochMilli())
                 .entityId(id)
                 .build());
+        log.warn("{} удалил ревью {}", reviewToDelete.getUserId(), id);
     }
-
 
     private Integer insert(String query, Object... params) {
         try {
-
-
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(connection -> {
                 PreparedStatement ps = connection
@@ -111,9 +117,7 @@ public class ReviewRepository {
                 }
                 return ps;
             }, keyHolder);
-
             Integer id = keyHolder.getKeyAs(Integer.class);
-
             if (id != null) {
                 return id;
             } else {
@@ -129,8 +133,15 @@ public class ReviewRepository {
         if (filmId != null) {
             query = query + " WHERE FILM_ID = " + filmId;
         }
+        query = query + " ORDER BY USEFUL DESC ";
         query = query + " LIMIT " + count;
 
         return jdbc.query(query, mapper);
     }
+
+    public void innerUpdate(Review review) {
+        jdbc.update(UPDATE_USEFUL, review.getUseful(),
+                review.getReviewId());
+    }
+
 }

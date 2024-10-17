@@ -22,7 +22,6 @@ public class UserController {
     private final FilmService filmService;
     private final EventRepository eventRepository;
 
-
     @PostMapping
     public User addUser(@RequestBody @Valid User newUser) {
         return userService.addUser(newUser);
@@ -63,12 +62,6 @@ public class UserController {
         return userService.getListOfCommonFriends(id, otherId);
     }
 
-    /**
-     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
-     *
-     * @param id полльзователя которму даются рекомендации
-     * @return возврщает список фильмов
-     */
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Long id) {
         return filmService.getRecommendations(id);

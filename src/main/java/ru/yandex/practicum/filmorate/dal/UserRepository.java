@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Repository("DBUsers")
+@Slf4j
 public class UserRepository implements UserStorage {
     private final JdbcTemplate jdbc;
     private final UserRowMapper userRowMapper;
@@ -71,7 +73,6 @@ public class UserRepository implements UserStorage {
 
     @Override
     public User addUser(User newUser) {
-        /* Изменил проверку имени пользователя для теста Common Friend Create */
         if (!StringUtils.hasText(newUser.getName())) {
             newUser.setName(newUser.getLogin());
         }
@@ -151,6 +152,7 @@ public class UserRepository implements UserStorage {
                 .timestamp(Instant.now().toEpochMilli())
                 .entityId(friendId)
                 .build());
+        log.warn("{}добавил в друзья {}", id, friendId);
     }
 
     @Override
@@ -178,6 +180,7 @@ public class UserRepository implements UserStorage {
                     .timestamp(Instant.now().toEpochMilli())
                     .entityId(friendId)
                     .build());
+            log.warn("{}удалил из друзей {}", id, friendId);
         }
     }
 
