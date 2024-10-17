@@ -15,7 +15,6 @@ import java.util.List;
 public class GenreRepository {
     private static final String FIND_ALL_GENRES = "SELECT * FROM GENRES";
     private static final String FIND_GENRE_BY_ID = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
-
     private final JdbcTemplate jdbc;
     private final GenreRowMapper mapper;
 

@@ -15,15 +15,12 @@ import java.util.List;
 public class MPARepository {
     private static final String FIND_ALL_MPA = "SELECT * FROM RATINGS ";
     private static final String FIND_MPA_BY_ID = "SELECT * FROM RATINGS WHERE RATING_ID = ?";
-
-
     private final JdbcTemplate jdbc;
     private final MPARowMapper mapper;
 
     public List<MPA> getAllMPA() {
         return jdbc.query(FIND_ALL_MPA, mapper);
     }
-
 
     public MPA getMPAByID(Integer id) {
         try {

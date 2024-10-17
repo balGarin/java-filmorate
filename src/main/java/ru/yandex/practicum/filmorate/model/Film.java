@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validation.ConsistentDateParameters;
 
@@ -25,6 +27,7 @@ public class Film {
     private Set<Integer> likes;
     private Set<Genre> genres;
     private MPA mpa;
+    private Set<Director> directors;
 
     @JsonIgnore
     public int getLikesSize() {
