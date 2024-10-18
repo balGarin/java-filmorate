@@ -137,17 +137,17 @@ public class InMemoryFilmStorage implements FilmStorage {
      */
     @Override
     public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
-        return null;
+        return new ArrayList<>();
     }
 
     /**
@@ -158,31 +158,31 @@ public class InMemoryFilmStorage implements FilmStorage {
      */
     @Override
     public List<Film> getRecommendations(Long userId) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> searchFilmByDirector(String query) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> searchFilmByTitle(String query) {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
     public List<Film> searchFilmByNameAndDirector(String query) {
-        return null;
+        return new ArrayList<>();
     }
 }
