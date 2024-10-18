@@ -20,6 +20,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+
     public User addUser(User user) {
         return userStorage.addUser(user);
     }
@@ -53,5 +54,8 @@ public class UserService {
         return userStorage.getListOfCommonFriends(id, otherId);
     }
 
+    public void deleteUserById(Integer id) {
+        userStorage.deleteUserById(id);
+    }
 
 }

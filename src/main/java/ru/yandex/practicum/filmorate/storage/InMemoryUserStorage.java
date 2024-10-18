@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Repository("InMemoryUsers")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private Map<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
 
 
     @Override
@@ -27,7 +27,7 @@ public class InMemoryUserStorage implements UserStorage {
 
         }
         users.put(newUser.getId(), newUser);
-        log.info("Добавлен новый пользователь {}", newUser.toString());
+        log.info("Добавлен новый пользователь {}", newUser);
         return newUser;
     }
 
@@ -55,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (newUser.getBirthday() != null) {
             user.setBirthday(newUser.getBirthday());
         }
-        log.info("Пользователь № {} успешно обновлен", user.toString());
+        log.info("Пользователь № {} успешно обновлен", user);
         return user;
     }
 
@@ -147,5 +147,10 @@ public class InMemoryUserStorage implements UserStorage {
         User friend = getById(friendId);
         removeFriend(id, friendId);
         removeFriend(friendId, id);
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+
     }
 }
