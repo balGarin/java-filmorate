@@ -4,10 +4,14 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dal.EventRepository;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -15,7 +19,8 @@ import java.util.*;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-
+    private final FilmService filmService;
+    private final EventRepository eventRepository;
 
     @PostMapping
     public User addUser(@RequestBody @Valid User newUser) {
@@ -55,7 +60,21 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getListOfCommonFriends(id, otherId);
-
     }
 
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable Long id) {
+        return filmService.getRecommendations(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUserByID(@PathVariable Integer id) {
+        userService.deleteUserById(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getListOfEvents(@PathVariable Integer id) {
+        return eventRepository.getEventByUserId(id);
+    }
 }
+

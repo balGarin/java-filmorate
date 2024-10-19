@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 @Repository("InMemoryFilms")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private Map<Integer, Film> films = new HashMap<>();
-    private InMemoryUserStorage userStorage;
+    private final Map<Integer, Film> films = new HashMap<>();
+    private final InMemoryUserStorage userStorage;
 
     public InMemoryFilmStorage(InMemoryUserStorage userStorage) {
         this.userStorage = userStorage;
@@ -26,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         newFilm.setId(generateId());
         newFilm.setLikes(new HashSet<>());
         films.put(newFilm.getId(), newFilm);
-        log.info("Добавлен новый фильм {}", newFilm.toString());
+        log.info("Добавлен новый фильм {}", newFilm);
         return newFilm;
     }
 
@@ -54,7 +54,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (newFilm.getReleaseDate() != null) {
             film.setReleaseDate(newFilm.getReleaseDate());
         }
-        log.info("Фильм № {} успешно обновлен ", film.toString());
+        log.info("Фильм № {} успешно обновлен ", film);
         return film;
     }
 
@@ -122,4 +122,67 @@ public class InMemoryFilmStorage implements FilmStorage {
         return popularFilm;
     }
 
+    @Override
+    public void deleteFilmById(Integer id) {
+
+    }
+
+    /**
+     * Вывод самых популярных фильмов по жанру и годам, 3 метода.
+     *
+     * @param count   количество топ фильмов, 10 по умолчанию,
+     * @param genreId айди жанра, для фильтрации по жанру,
+     * @param year    год выходы фильма, для фильтрации по году,
+     * @return Возвращает список самых популярных фильмов указанного жанра за нужный год.
+     */
+    @Override
+    public List<Film> getPopularFilmsOnGenreAndYear(Integer count, Integer genreId, Integer year) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByYear(Integer count, Integer year) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(Integer count, Integer genreId) {
+        return new ArrayList<>();
+    }
+
+    /**
+     * Вывод списка фильмов рекомендованных на основе лайков других пользователей
+     *
+     * @param userId полльзователя которму даются рекомендации
+     * @return возврщает список фильмов
+     */
+    @Override
+    public List<Film> getRecommendations(Long userId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> getFilmsSortedByDirector(Integer directorId, String sortBy) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> searchFilmByDirector(String query) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String query) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Film> searchFilmByNameAndDirector(String query) {
+        return new ArrayList<>();
+    }
 }

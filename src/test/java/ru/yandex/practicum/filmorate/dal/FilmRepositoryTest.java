@@ -113,12 +113,6 @@ class FilmRepositoryTest {
         film.setReleaseDate(LocalDate.now());
         filmRepository.addFilm(film);
         filmRepository.addLike(1, 1);
-//        Film filmFromDBWithLikes = filmRepository.getFilmById(1);
-//        assertNotNull(filmFromDBWithLikes.getLikes(), "Лайки не появились");
-//        assertEquals(1, filmFromDBWithLikes.getLikesSize(), "Количество лайков не корректно");
-//        filmRepository.deleteLike(1, 1);
-//        Film filmFromDBWithoutLikes = filmRepository.getFilmById(1);
-//        assertEquals(0, filmFromDBWithoutLikes.getLikesSize(), "Лайк не удалился");
         assertEquals(1, filmRepository.getLikes(1).size(), "Лайк не появился");
         assertEquals(1, filmRepository.getLikes(1).get(0), "Id юзера не совпадает");
         filmRepository.deleteLike(1, 1);
